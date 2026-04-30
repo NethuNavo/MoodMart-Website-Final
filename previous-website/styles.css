@@ -1,0 +1,31 @@
+/* Simple, older-style site styles — dated, minimal aesthetic */
+:root{
+  --brand:#2c3e50; /* dark slate for header */
+  --muted-bg:#f3efe6; /* soft beige page background */
+  --button-old:#6a2fb3; /* updated to theme purple */
+  --button-secondary:#7f8c8d; /* muted secondary */
+  --footer-bg:#2a0a3d; /* purple footer to match theme */
+  --footer-text:#f3eef8;
+}
+*{box-sizing:border-box}
+body{font-family:Arial, Helvetica, sans-serif;background:var(--muted-bg);color:#222;margin:0}
+.container{max-width:960px;margin:0 auto;padding:16px}
+.site-header{background:var(--brand);color:#fff;padding:14px 0}
+.brand{margin:0;display:inline-block;font-size:24px}
+.nav{float:right}
+.nav-link{color:#fff;margin-left:18px;text-decoration:none}
+.main{padding:32px 16px}
+.hero{background:#fff;padding:24px;border:1px solid #ddd}
+.lead{color:#555}
+.btn{display:inline-block;padding:10px 16px;text-decoration:none;border-radius:4px;margin-right:8px}
+.btn-primary{background:var(--button-old);color:#fff;border:1px solid #b04500}
+.btn-secondary{background:var(--button-secondary);color:#fff;border:1px solid #6e7a7a}
+.btn.small{padding:8px 12px;font-size:14px}
+.features{display:flex;gap:16px;margin-top:20px}
+.card{background:#fff;padding:16px;border:1px solid #ddd;flex:1}
+.site-footer{background:var(--footer-bg);color:var(--footer-text);margin-top:30px}
+.footer-inner{display:flex;gap:24px;padding:24px}
+.footer-col h4{margin-top:0;color:#f0e6d6}
+.footer-bottom{text-align:center;padding:10px;background:#15120f;color:#cfc7bf;font-size:13px}
+
+@media(max-width:700px){.nav{float:none;text-align:center;margin-top:8px}.features{flex-direction:column}}

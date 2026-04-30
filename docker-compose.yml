@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '5000:5000'
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/mernapp
+    depends_on:
+      - mongo
+  client:
+    build: ./client
+    ports:
+      - '5173:5173'
+    environment:
+      - VITE_API_URL=http://localhost:5000
+  mongo:
+    image: mongo:6
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
