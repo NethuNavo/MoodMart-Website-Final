@@ -20,7 +20,7 @@ import {
 import { toast } from 'sonner';
 import { Heart } from 'lucide-react';
 
-type PaymentMethod = 'cod' | 'card' | 'mobile' | 'bank';
+type PaymentMethod = 'cod' | 'stripe' | 'mobile' | 'bank';
 
 const checkoutBanner = new URL('../../assets/checkout-banner.png', import.meta.url).href;
 
@@ -40,12 +40,6 @@ export function CheckoutPage() {
     city: '',
     state: '',
     zipCode: '',
-    
-    // Card details
-    cardNumber: '',
-    cardName: '',
-    expiryDate: '',
-    cvv: '',
     
     // Mobile wallet
     mobileNumber: '',
@@ -70,11 +64,9 @@ export function CheckoutPage() {
       return;
     }
 
-    if (paymentMethod === 'card') {
-      if (!formData.cardNumber || !formData.cardName || !formData.expiryDate || !formData.cvv) {
-        toast.error('Please fill in all card details');
-        return;
-      }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
     }
 
     if (paymentMethod === 'mobile') {
@@ -86,21 +78,71 @@ export function CheckoutPage() {
 
     setIsProcessing(true);
 
-    // Simulate processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      toast.success('Order placed successfully!', {
-        description: `Your order of Rs.${total.toFixed(2)} has been confirmed.`,
+    try {
+      if (paymentMethod !== 'stripe') {
+        toast.success('Order placed successfully!');
+        setIsProcessing(false);
+        navigate('/order-success');
+        return;
+      }
+
+      // Prepare data for Stripe
+      const checkoutData = {
+        cart: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          description: item.description,
+          image: item.image
+        })),
+        shipping: shipping,
+        customer: {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          paymentMethod: 'Stripe'
+        }
+      };
+
+      // Call Stripe API
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(checkoutData)
       });
-      navigate('/order-success');
-    }, 2000);
+
+      const data = await response.json();
+      console.log('Stripe checkout response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || 'Failed to create checkout session');
+      }
+
+      if (data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      toast.error(`Payment setup failed: ${error.message || 'Please try again.'}`);
+      setIsProcessing(false);
+    }
   };
 
   const getButtonText = () => {
     if (isProcessing) return 'Processing...';
     switch (paymentMethod) {
       case 'cod': return 'Place Order';
-      case 'card': return 'Pay Now';
+      case 'stripe': return 'Pay with Stripe';
       case 'mobile': return 'Pay via Mobile';
       case 'bank': return 'Complete Order';
       default: return 'Place Order';
@@ -273,20 +315,15 @@ export function CheckoutPage() {
 
                   {/* Credit/Debit Card */}
                   <label className={`flex items-start gap-4 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    paymentMethod === 'card' ? 'border-purple-600 bg-purple-50' : 'border-gray-200 hover:border-purple-300'
+                    paymentMethod === 'stripe' ? 'border-purple-600 bg-purple-50' : 'border-gray-200 hover:border-purple-300'
                   }`}>
-                    <RadioGroupItem value="card" id="card" />
+                    <RadioGroupItem value="stripe" id="stripe" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <CreditCard className="w-5 h-5 text-purple-600" />
-                        <span className="font-medium">Credit / Debit Card</span>
+                        <span className="font-medium">Stripe Checkout</span>
                       </div>
-                      <p className="text-sm text-gray-600">Visa, MasterCard, Amex</p>
-                      <div className="flex gap-2 mt-2">
-                        <div className="w-10 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs">VISA</div>
-                        <div className="w-10 h-6 bg-red-600 rounded flex items-center justify-center text-white text-xs">MC</div>
-                        <div className="w-10 h-6 bg-blue-500 rounded flex items-center justify-center text-white text-xs">AMEX</div>
-                      </div>
+                      <p className="text-sm text-gray-600">Pay securely with Stripe using Visa, MasterCard, or Amex</p>
                     </div>
                   </label>
 
@@ -329,54 +366,15 @@ export function CheckoutPage() {
                   <h2 className="text-xl">Payment Details</h2>
                 </div>
 
-                {/* Card Payment Form */}
-                {paymentMethod === 'card' && (
+                {/* Stripe Checkout Notice */}
+                {paymentMethod === 'stripe' && (
                   <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="cardNumber">Card Number *</Label>
-                      <Input
-                        id="cardNumber"
-                        name="cardNumber"
-                        placeholder="1234 5678 9012 3456"
-                        value={formData.cardNumber}
-                        onChange={handleInputChange}
-                        maxLength={19}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="cardName">Cardholder Name *</Label>
-                      <Input
-                        id="cardName"
-                        name="cardName"
-                        placeholder="John Doe"
-                        value={formData.cardName}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiryDate">Expiry Date *</Label>
-                        <Input
-                          id="expiryDate"
-                          name="expiryDate"
-                          placeholder="MM/YY"
-                          value={formData.expiryDate}
-                          onChange={handleInputChange}
-                          maxLength={5}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="cvv">CVV *</Label>
-                        <Input
-                          id="cvv"
-                          name="cvv"
-                          placeholder="123"
-                          type="password"
-                          value={formData.cvv}
-                          onChange={handleInputChange}
-                          maxLength={4}
-                        />
-                      </div>
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                      <p className="font-medium text-gray-800 mb-2">Stripe Checkout</p>
+                      <p className="text-sm text-gray-600">
+                        You will be redirected to Stripe's secure checkout page to complete your card payment.
+                        No card details are stored by MoodMart on this site.
+                      </p>
                     </div>
                   </div>
                 )}

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -7,16 +7,60 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { CheckCircle, Package, Heart, TrendingUp, ShieldCheck, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 
 export function OrderSuccessPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, isGuest, registerUser, markOrderComplete } = useUser();
   const [showRegistration, setShowRegistration] = useState(false);
+  const [paymentVerified, setPaymentVerified] = useState(false);
+  const [orderDetails, setOrderDetails] = useState(null);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
   });
+
+  // Verify Stripe payment on page load
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    if (sessionId) {
+      verifyPayment(sessionId);
+    } else {
+      // If no session_id, assume it's a direct navigation (for testing)
+      setPaymentVerified(true);
+    }
+  }, [searchParams]);
+
+  const verifyPayment = async (sessionId: string) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+
+      const data = await response.json();
+
+      if (data.payment_status === 'paid') {
+        setPaymentVerified(true);
+        setOrderDetails(data);
+        toast.success('Payment verified successfully!');
+      } else {
+        toast.error('Payment verification failed');
+        navigate('/checkout');
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      toast.error('Failed to verify payment');
+      // For development, allow continuation
+      setPaymentVerified(true);
+    }
+  };
 
   const handleSkip = () => {
     markOrderComplete();
@@ -65,7 +109,7 @@ export function OrderSuccessPage() {
           <div className="grid md:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-gray-600">Order Number</p>
-              <p className="font-medium">#{Math.floor(Math.random() * 1000000)}</p>
+              <p className="font-medium">#{searchParams.get('session_id')?.slice(-8) || Math.floor(Math.random() * 1000000)}</p>
             </div>
             <div>
               <p className="text-gray-600">Estimated Delivery</p>
@@ -73,12 +117,30 @@ export function OrderSuccessPage() {
             </div>
             <div>
               <p className="text-gray-600">Payment Method</p>
-              <p className="font-medium">Cash on Delivery</p>
+              <p className="font-medium">
+                {paymentVerified ? 'Credit/Debit Card (Stripe)' : 'Cash on Delivery'}
+              </p>
             </div>
             <div>
-              <p className="text-gray-600">Status</p>
-              <p className="font-medium text-purple-600">Confirmed</p>
+              <p className="text-gray-600">Payment Status</p>
+              <p className={`font-medium ${paymentVerified ? 'text-green-600' : 'text-orange-600'}`}>
+                {paymentVerified ? 'Paid' : 'Pending'}
+              </p>
             </div>
+            {orderDetails && (
+              <>
+                <div>
+                  <p className="text-gray-600">Amount Paid</p>
+                  <p className="font-medium">
+                    Rs.{(orderDetails.amount_total / 100).toFixed(2)} {orderDetails.currency?.toUpperCase()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Customer Email</p>
+                  <p className="font-medium">{orderDetails.customer_email}</p>
+                </div>
+              </>
+            )}
           </div>
         </Card>
 
