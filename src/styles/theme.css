@@ -327,14 +327,56 @@ button.touched:hover, a.btn.touched:hover { filter: brightness(0.95); transform:
 .site-header .nav-link::after{ content:''; position:absolute; left:12px; right:12px; height:2px; bottom:-8px; background:transparent; border-radius:4px; transform:scaleX(0); transform-origin:left; transition:transform .18s ease, background .18s ease }
 .site-header .nav-link.active::after, .site-header .nav-link:hover::after { transform:scaleX(1); background: linear-gradient(90deg, var(--lux-primary), rgba(106,47,179,0.7)); }
 
-/* Mobile header - clean minimal styling */
+/* Mobile header - clean minimal styling - EXPANDED */
 @media (max-width: 768px) {
-  .site-header button, .site-header svg { 
+  /* Global accent color removal for mobile */
+  :root {
+    --accent: transparent;
+    --color-accent: transparent;
+  }
+  
+  /* Remove yellow from all elements */
+  [class*="accent"], 
+  [class*="yellow"],
+  [class*="ring-yellow"],
+  [style*="#F6C85F"] {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+  
+  .site-header button, 
+  .site-header svg,
+  .site-header [role="button"] { 
     background: transparent !important; 
     filter: none !important;
+    color: #666 !important;
   }
-  .site-header [role="button"] {
+  .site-header button:focus,
+  .site-header button:active,
+  .site-header button:focus-visible {
     background: transparent !important;
+    outline: none !important;
+    ring: none !important;
+    box-shadow: none !important;
+  }
+  .site-header button:focus-within {
+    background: transparent !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Extra specificity for small screens */
+  .site-header button {
+    background: white !important;
+    color: #666 !important;
+  }
+  .site-header button:hover {
+    background: #f3f4f6 !important;
+  }
+  .site-header button:focus-visible,
+  .site-header button:focus {
+    background: #f3f4f6 !important;
+    outline: 1px solid #d1d5db !important;
   }
 }
 
