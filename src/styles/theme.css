@@ -287,7 +287,16 @@ button.touched:hover, a.btn.touched:hover { filter: brightness(0.95); transform:
   .site-header .container { flex-direction: column; align-items: stretch; }
   .lux-btn-primary { width: 100%; justify-content: center; }
   .h-80 { height: 18rem !important; }
+  
+  /* Remove yellow highlights from mobile header */
+  .site-header button { background-color: transparent !important; }
+  .site-header svg { color: currentColor !important; }
+  .site-header [class*="bg-yellow"], .site-header [class*="text-yellow"] { 
+    background-color: transparent !important; 
+    color: inherit !important; 
+  }
 }
+
 
 /* Custom Animations */
 
@@ -317,6 +326,17 @@ button.touched:hover, a.btn.touched:hover { filter: brightness(0.95); transform:
 .site-header .nav-link{ position:relative; overflow:visible }
 .site-header .nav-link::after{ content:''; position:absolute; left:12px; right:12px; height:2px; bottom:-8px; background:transparent; border-radius:4px; transform:scaleX(0); transform-origin:left; transition:transform .18s ease, background .18s ease }
 .site-header .nav-link.active::after, .site-header .nav-link:hover::after { transform:scaleX(1); background: linear-gradient(90deg, var(--lux-primary), rgba(106,47,179,0.7)); }
+
+/* Mobile header - clean minimal styling */
+@media (max-width: 768px) {
+  .site-header button, .site-header svg { 
+    background: transparent !important; 
+    filter: none !important;
+  }
+  .site-header [role="button"] {
+    background: transparent !important;
+  }
+}
 
 /* Footer refinements */
 .site-footer{ overflow:visible }
