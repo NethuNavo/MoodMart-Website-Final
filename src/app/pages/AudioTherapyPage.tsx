@@ -153,7 +153,7 @@ export function AudioTherapyPage() {
           <ImageWithFallback 
             src={audioTherapyImage} 
             alt="Audio Therapy - Listen to curated audio sessions for peace and relaxation" 
-            className="w-full h-80 object-cover animate-fade-in"
+            className="w-full h-60 sm:h-80 object-cover animate-fade-in"
           />
         </div>
         {/* Decorative floating elements */}

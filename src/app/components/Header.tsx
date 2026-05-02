@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, LogOut } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Menu, X } from 'lucide-react';
 import { useMood } from '../context/MoodContext';
 import { useUser } from '../context/UserContext';
 import { MiniCart } from './MiniCart';
@@ -12,6 +12,7 @@ export function Header() {
   const { isAdmin } = useUser();
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [isMiniCartOpen, setIsMiniCartOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [cartAnimation, setCartAnimation] = useState(false);
   const [prevCartCount, setPrevCartCount] = useState(0);
 
@@ -23,6 +24,10 @@ export function Header() {
     }
     setPrevCartCount(cartItemsCount);
   }, [cartItemsCount]);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const navLinks = [
     { to: '/', label: 'Home' },
@@ -40,10 +45,10 @@ export function Header() {
     <>
       <header className="site-header sticky top-0 z-50">
         <div className="container">
-          <div className="flex items-center justify-between h-18">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-2 md:h-18">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src={logo} alt="MoodMart" className="h-12 w-12 transform group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-2xl lux-heading">MoodMart</span>
+              <img src={logo} alt="MoodMart" className="h-10 w-10 md:h-12 md:w-12 transform group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-xl md:text-2xl lux-heading">MoodMart</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-4">
@@ -74,7 +79,17 @@ export function Header() {
               )}
             </nav>
 
-            <div className="flex items-center gap-4">
+            <button
+              type="button"
+              aria-label="Toggle mobile menu"
+              aria-expanded={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              className="md:hidden p-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-all duration-200"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+
+            <div className="flex flex-wrap items-center gap-3">
               <button 
                 onClick={() => setIsMiniCartOpen(true)}
                 className="relative cursor-pointer group"
@@ -106,6 +121,38 @@ export function Header() {
                 </Link>
               )}
             </div>
+          </div>
+
+          <div className={`md:hidden mt-3 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+            <nav className="grid gap-2 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-sm backdrop-blur-sm">
+              {navLinks.map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 ${
+                    location.pathname === link.to
+                      ? 'bg-purple-50 text-purple-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 ${
+                    location.pathname === '/admin'
+                      ? 'bg-purple-50 text-purple-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'
+                  }`}
+                >
+                  Admin
+                </Link>
+              )}
+            </nav>
           </div>
         </div>
       </header>

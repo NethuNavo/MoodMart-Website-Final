@@ -24,6 +24,7 @@ import {
   Mail,
   User as UserIcon,
   X,
+  Menu,
   Image as ImageIcon
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -55,6 +56,7 @@ export function AdminDashboardPage() {
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'users' | 'settings'>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Product Modal State
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -600,11 +602,81 @@ export function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Mobile Sidebar Toggle - Simplified for this layout */}
-      
+      {/* Mobile Sidebar Toggle */}
+      <div className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 ${isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'} md:hidden`} onClick={() => setIsSidebarOpen(false)} />
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200 p-4 overflow-y-auto transition-transform duration-200 md:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold text-xl">
+              M
+            </div>
+            <div>
+              <h1 className="font-bold text-gray-900">MoodMart</h1>
+              <p className="text-xs text-gray-500">Admin Panel</p>
+            </div>
+          </div>
+        </div>
+        <nav className="space-y-2">
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+            { id: 'products', label: 'Products', icon: Package },
+            { id: 'orders', label: 'Orders', icon: ShoppingCart },
+            { id: 'users', label: 'Users', icon: Users },
+            { id: 'settings', label: 'Settings', icon: Settings },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveTab(item.id as any);
+                setIsSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                activeTab === item.id
+                  ? 'bg-purple-100 text-purple-700 font-medium'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <item.icon className="w-5 h-5" />
+              {item.label}
+            </button>
+          ))}
+        </nav>
+        <div className="mt-8 p-4 bg-gray-50 rounded-xl">
+          <div className="flex items-center gap-3">
+            <img src={adminProfile.image} className="w-10 h-10 rounded-full object-cover" alt="Admin" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">{adminProfile.name}</p>
+              <p className="text-xs text-gray-500 truncate">{adminProfile.email}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {renderSidebar()}
       
       <main className="flex-1 min-w-0 overflow-auto">
+        <div className="md:hidden bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between px-4 py-3">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-all duration-200"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="text-center flex-1 px-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Admin</p>
+              <h2 className="text-base font-semibold text-gray-900 truncate">{activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('dashboard')}
+              className="text-sm text-purple-600 hover:text-purple-700"
+            >
+              Home
+            </button>
+          </div>
+        </div>
         {/* Header Image Banner */}
         <div className="relative h-80 bg-gradient-to-r from-purple-900/40 via-purple-800/30 to-teal-900/40">
            <img 

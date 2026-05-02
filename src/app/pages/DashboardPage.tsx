@@ -54,7 +54,7 @@ export function DashboardPage() {
           <img
             src={dashboardHeaderImage}
             alt="Dashboard - Overview of your wellness journey"
-            className="w-full h-80 object-cover animate-fade-in"
+            className="w-full h-60 sm:h-80 object-cover animate-fade-in"
           />
         </div>
         

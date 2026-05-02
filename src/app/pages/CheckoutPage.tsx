@@ -178,7 +178,7 @@ export function CheckoutPage() {
             <img
               src={checkoutBanner}
               alt="Checkout banner"
-              className="w-full h-80 object-cover object-center"
+              className="w-full h-60 sm:h-80 object-cover object-center"
             />
           </div>
         </div>
@@ -431,13 +431,13 @@ export function CheckoutPage() {
 
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="p-6 sticky top-24">
+            <Card className="p-6 lg:sticky lg:top-24">
               <h2 className="text-xl mb-6">Order Summary</h2>
 
               {/* Product List */}
               <div className="space-y-4 mb-6">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex gap-3">
+                  <div key={item.id} className="flex flex-col sm:flex-row gap-3">
                     <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex-shrink-0 overflow-hidden">
                       <ImageWithFallback
                         src={item.image}

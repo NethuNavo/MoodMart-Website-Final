@@ -232,6 +232,17 @@ button.touched:hover, a.btn.touched:hover { filter: brightness(0.95); transform:
 
 .site-header .nav { display:flex; align-items:center; gap:18px }
 
+@media (max-width: 767px) {
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .site-header {
+    padding: 14px 0;
+  }
+}
+
 .card {
   background: var(--card);
   color: var(--card-foreground);
@@ -265,6 +276,17 @@ button.touched:hover, a.btn.touched:hover { filter: brightness(0.95); transform:
 @media (max-width:800px){
   .hero{padding:28px 0}
   .container{padding-left:14px;padding-right:14px}
+  .lux-btn-primary{padding: 10px 14px;}
+  .site-header { padding: 12px 0; }
+  .site-header .container { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+}
+
+@media (max-width:640px) {
+  .container { padding-left: 12px; padding-right: 12px; }
+  .site-header { padding: 10px 0; }
+  .site-header .container { flex-direction: column; align-items: stretch; }
+  .lux-btn-primary { width: 100%; justify-content: center; }
+  .h-80 { height: 18rem !important; }
 }
 
 /* Custom Animations */

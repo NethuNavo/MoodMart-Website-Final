@@ -133,11 +133,13 @@ export function HomePage() {
       {/* Hero Section - Meditation Banner */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#B4D4D3] via-white to-[#C5B8D8]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <img 
-            src={calmBannerImage} 
-            alt="Unlock Your Inner Calm - Your personal journey to emotional wellness" 
-            className="w-full h-80 object-cover animate-fade-in"
-          />
+          <div className="overflow-hidden rounded-b-3xl bg-white shadow-sm">
+            <img 
+              src={calmBannerImage} 
+              alt="Unlock Your Inner Calm - Your personal journey to emotional wellness" 
+              className="w-full h-auto max-h-[320px] sm:max-h-[420px] object-contain object-center animate-fade-in"
+            />
+          </div>
         </div>
         
         {/* Decorative floating elements */}

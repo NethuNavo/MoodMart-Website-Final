@@ -65,7 +65,7 @@ export function ProfilePage() {
           <img 
             src={profileHeaderImage} 
             alt="Profile - View your wellness journey & achievements" 
-            className="w-full h-80 object-cover animate-fade-in"
+            className="w-full h-60 sm:h-80 object-cover animate-fade-in"
           />
         </div>
         

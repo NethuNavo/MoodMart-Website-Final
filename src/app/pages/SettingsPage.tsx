@@ -49,7 +49,7 @@ export function SettingsPage() {
           <img
             src={settingsHeaderImage}
             alt="Settings - Manage your account and preferences"
-            className="w-full h-80 object-cover animate-fade-in"
+            className="w-full h-60 sm:h-80 object-cover animate-fade-in"
           />
         </div>
         <div className="absolute top-5 left-10 w-24 h-24 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>

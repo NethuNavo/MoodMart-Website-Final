@@ -73,7 +73,7 @@ export function CartPage() {
             <img
               src={cartBanner}
               alt="Your Shopping Cart"
-              className="w-full h-80 object-cover object-center"
+              className="w-full h-60 sm:h-80 object-cover object-center"
             />
           </div>
           <p className="text-xl font-semibold text-purple-700 bg-purple-50 inline-block px-3 py-2 rounded-lg shadow-sm">
@@ -103,9 +103,9 @@ export function CartPage() {
             {/* Cart Items List */}
             {cart.map((item) => (
               <Card key={item.id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex gap-6">
+                <div className="flex flex-col lg:flex-row gap-6">
                   {/* Product Image */}
-                  <div className="w-32 h-32 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden lux-elevated">
+                  <div className="w-full lg:w-32 h-32 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden lux-elevated">
                     <ImageWithFallback
                       src={item.image}
                       alt={item.name}
@@ -164,7 +164,7 @@ export function CartPage() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="p-6 sticky top-24 lux-elevated">
+            <Card className="p-6 lg:sticky lg:top-24 lux-elevated">
               <h2 className="text-xl mb-6 lux-heading">Order Summary</h2>
 
               {/* Coupon Code */}

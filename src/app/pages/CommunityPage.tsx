@@ -243,7 +243,7 @@ export function CommunityPage() {
           <img 
             src={communityForumImage} 
             alt="Community Forum - You are not alone. Share, learn, and grow together." 
-            className="w-full h-80 object-cover animate-fade-in"
+            className="w-full h-60 sm:h-80 object-cover animate-fade-in"
           />
         </div>
         {/* Decorative floating elements */}

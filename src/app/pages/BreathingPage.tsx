@@ -103,7 +103,7 @@ export function BreathingPage() {
           <img 
             src={guidedBreathingImage} 
             alt="Guided Breathing - Practice mindful breathing exercises for relaxation and stress relief" 
-            className="w-full h-80 object-cover animate-fade-in"
+            className="w-full h-60 sm:h-80 object-cover animate-fade-in"
           />
         </div>
         {/* Decorative floating elements */}
