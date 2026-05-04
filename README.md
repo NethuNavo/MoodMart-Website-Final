@@ -62,7 +62,6 @@ EMAIL_PASS=your_gmail_app_password
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-> Use a Gmail App Password in `EMAIL_PASS` for secure SMTP delivery.
 
 Start the backend:
 
@@ -101,22 +100,3 @@ Nodemailer uses Gmail SMTP. Make sure you:
 - enable Google Two-Factor Authentication
 - generate a Gmail App Password
 - add the full 16-character code to `EMAIL_PASS`
-
-## 🧩 Useful Commands
-
-- Start backend: `cd backend && npm run dev`
-- Start frontend: `cd client && npm run dev`
-- Install backend deps: `cd backend && npm install`
-- Install frontend deps: `cd client && npm install`
-
-## 🔒 Notes
-
-- Never commit `.env` files to GitHub
-- Keep `backend/.env` credentials private
-- Use Stripe test keys for development only
-
-## 🛠️ Troubleshooting
-
-- If port `5000` is busy, stop the current process or change `PORT`
-- If SMTP login fails, confirm your Gmail app password and account setup
-- If Stripe checkout fails, verify `STRIPE_SECRET_KEY` and `CLIENT_URL`
