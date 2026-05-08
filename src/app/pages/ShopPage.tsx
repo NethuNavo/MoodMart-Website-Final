@@ -234,26 +234,33 @@ export function ShopPage() {
           </div>
 
           {/* Personalized Recommendations */}
-          <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-8">
-            <h2 className="mb-4">Recommended For You</h2>
-            <p className="text-gray-700 mb-6">
-              Based on your mood tracking data and preferences, we think you'll love these products:
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg p-4">
-                <h3 className="mb-2">Stress Relief Bundle</h3>
-                <p className="text-gray-600 mb-3">Essential oils, journal, and guided meditation book</p>
-                <p className="text-xl text-purple-600">Rs.5999.00</p>
+          <div className="bg-gradient-to-r from-[#6a2fb3] via-[#5b2591] to-[#4b237f] rounded-[2rem] p-8 shadow-2xl ring-1 ring-white/20 overflow-hidden">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-8">
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">Recommended For You</h2>
+                <p className="text-white/85 max-w-2xl">
+                  Based on your mood tracking data and preferences, we think you'll love these products:
+                </p>
               </div>
-              <div className="bg-white rounded-lg p-4">
-                <h3 className="mb-2">Sleep Better Kit</h3>
-                <p className="text-gray-600 mb-3">Lavender oil, sleep journal, and relaxation guide</p>
-                <p className="text-xl text-purple-600">Rs.4499.00</p>
+              <div className="inline-flex items-center rounded-full bg-white/15 px-4 py-2 text-sm font-semibold text-white border border-white/20">
+                Tailored picks for your wellness journey
               </div>
-              <div className="bg-white rounded-lg p-4">
-                <h3 className="mb-2">Mindfulness Starter</h3>
-                <p className="text-gray-600 mb-3">Meditation cushion, journal, and beginner's book</p>
-                <p className="text-xl text-purple-600">Rs.7499.00</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white/95 border border-white/60 rounded-3xl p-6 shadow-xl backdrop-blur-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">Stress Relief Bundle</h3>
+                <p className="text-slate-600 mb-4">Essential oils, journal, and guided meditation book</p>
+                <p className="text-2xl font-bold text-purple-700">Rs.5999.00</p>
+              </div>
+              <div className="bg-white/95 border border-white/60 rounded-3xl p-6 shadow-xl backdrop-blur-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">Sleep Better Kit</h3>
+                <p className="text-slate-600 mb-4">Lavender oil, sleep journal, and relaxation guide</p>
+                <p className="text-2xl font-bold text-purple-700">Rs.4499.00</p>
+              </div>
+              <div className="bg-white/95 border border-white/60 rounded-3xl p-6 shadow-xl backdrop-blur-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">Mindfulness Starter</h3>
+                <p className="text-slate-600 mb-4">Meditation cushion, journal, and beginner's book</p>
+                <p className="text-2xl font-bold text-purple-700">Rs.7499.00</p>
               </div>
             </div>
           </div>

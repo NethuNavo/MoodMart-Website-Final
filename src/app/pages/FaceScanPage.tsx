@@ -1,12 +1,25 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { Camera, Scan, AlertCircle, Smile, Frown, Meh, AlertTriangle, CloudRain, ThumbsDown, Zap } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import facialRecognitionImage from "../../assets/facial-recognition.png";
 
 export function FaceScanPage() {
+  const { isGuest, isRegistered } = useUser();
+  const navigate = useNavigate();
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  // Track guest scans
+  const [hasUsedGuestScan, setHasUsedGuestScan] = useState(() => {
+    return localStorage.getItem('faceScanGuestUsed') === 'true';
+  });
+
   const [isScanning, setIsScanning] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
@@ -38,6 +51,12 @@ export function FaceScanPage() {
   const [dominantEmotion, setDominantEmotion] = useState(emotions[0]);
 
   const handleScan = useCallback(() => {
+    // Check if guest has already used their free scan
+    if (isGuest && hasUsedGuestScan) {
+      setShowAuthPrompt(true);
+      return;
+    }
+
     setIsScanning(true);
     setShowResult(false);
     
@@ -80,10 +99,14 @@ export function FaceScanPage() {
       
       setIsScanning(false);
       setShowResult(true);
+
+      // Mark guest scan as used
+      if (isGuest) {
+        setHasUsedGuestScan(true);
+        localStorage.setItem('faceScanGuestUsed', 'true');
+      }
     }, 2000);
-  }, []); // Remove dependency on emotions to avoid stale closures if not careful, or just use functional update if needed. But here emotions is constant structure. Actually wait, emotions is state now.
-  // Better to use functional update or refs if emotions changes frequently, but here it changes on scan.
-  // Safest to just depend on empty array as the structure is known or use functional state update.
+  }, [isGuest, hasUsedGuestScan, emotions]);
 
 
   return (
@@ -105,14 +128,6 @@ export function FaceScanPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
         
-        {/* Warning/Info Alert */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-8 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-            <p className="text-gray-500 text-sm">
-                This is a demo interface. In production, this would use TensorFlow.js or similar ML frameworks for real-time facial emotion detection.
-            </p>
-        </div>
-
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
             {/* Left Column: Camera Feed */}
             <div className="bg-white rounded-3xl p-6 shadow-xl shadow-purple-50">
@@ -284,6 +299,33 @@ export function FaceScanPage() {
           100% { top: 100%; opacity: 0; }
         }
       `}</style>
+
+      {/* Auth Prompt Dialog */}
+      <Dialog open={showAuthPrompt} onOpenChange={setShowAuthPrompt}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Login Required</DialogTitle>
+            <DialogDescription>
+              You've used your free guest scan. Please log in or sign up to continue using the Face Scan feature.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 mt-4">
+            <Button 
+              onClick={() => navigate('/auth')} 
+              className="flex-1 bg-purple-600 hover:bg-purple-700"
+            >
+              Login
+            </Button>
+            <Button 
+              onClick={() => navigate('/auth')} 
+              variant="outline" 
+              className="flex-1"
+            >
+              Sign Up
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

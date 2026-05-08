@@ -1,6 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useMood } from '../context/MoodContext';
 import { useNotification } from '../context/NotificationContext';
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Plus } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -9,7 +12,6 @@ import { Input } from '../components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import { Slider } from '../components/ui/slider';
 import { Label } from '../components/ui/label';
-import { toast } from 'sonner';
 const headerBg = new URL('../../assets/a29c988cecf7518aefa1051e53ffc3b671037802.png', import.meta.url).href;
 const moodTrackerImage = new URL('../../assets/dee9378edbd4ba6c11d239aea2f3bed41d87b621.png', import.meta.url).href;
 
@@ -20,6 +22,17 @@ type MoodType = 'happy' | 'calm' | 'relaxed' | 'content' | 'energetic' | 'motiva
                 'depressed' | 'confused' | 'mentally-drained' | 'overthinking';
 
 export function MoodTrackerPage() {
+  const { isRegistered } = useUser();
+  const navigate = useNavigate();
+
+  // Redirect if not registered
+  useEffect(() => {
+    if (!isRegistered) {
+      toast.error('Please log in to access the Mood Tracker');
+      navigate('/auth');
+    }
+  }, [isRegistered, navigate]);
+
   const { moodEntries, addMoodEntry } = useMood();
   const { showMoodBasedNotification } = useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { MessageCircle, Camera, TrendingUp, Headphones, Wind, Users, Quote } from 'lucide-react';
+import { Camera, TrendingUp, Headphones, Wind, Users } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -11,6 +11,7 @@ const heroBannerImage = new URL('../../assets/683421661700aa65fdf714555327e8a983
 const wellnessDesign = new URL('../../assets/4b30ac2453362cc9d4add552f78ebd7948229050.png', import.meta.url).href;
 const guidedBreathingImage = new URL('../../assets/56deb1cbc104300eab46909bff0b6ae29dd296b8.png', import.meta.url).href;
 const facialRecognitionImage = new URL('../../assets/8679d179690d05cf96d9ad060eee651464a381ff.png', import.meta.url).href;
+const faceScanImage = new URL('../../assets/face scan.png', import.meta.url).href;
 const communityForumImage = new URL('../../assets/90621acae070342fba2db6779262061faacbe89a.png', import.meta.url).href;
 const moodTrackerImage = new URL('../../assets/dee9378edbd4ba6c11d239aea2f3bed41d87b621.png', import.meta.url).href;
 const audioTherapyImage = new URL('../../assets/e2b640b8b8dd6e106e29853af90b36d6d877ec1d.png', import.meta.url).href;
@@ -39,51 +40,44 @@ export function HomePage() {
 
   const quickAccess = [
     {
-      icon: <MessageCircle className="h-10 w-10" />,
-      title: 'Mood Tracker',
-      subtitle: 'Log Your Mood',
-      // subtle mint gradient with soft highlight
-      bg: 'bg-gradient-to-r from-[#E8F7F2] to-[#DFF6EE]',
-      iconColor: 'text-[#0F6B58]',
-      link: '/mood'
-    },
-    {
-      icon: <Camera className="h-10 w-10" />,
-      title: 'Emotion Scan',
+      icon: <Camera className="h-12 w-12" />,
+      title: 'Face Scan',
       subtitle: 'Scan Camera',
-      // reversed mint gradient for variety
-      bg: 'bg-gradient-to-r from-[#DFF6EE] to-[#E8F7F2]',
-      iconColor: 'text-[#0F6B58]',
+      bg: 'bg-[#7C63E9]',
+      iconColor: 'text-white',
       link: '/face-scan'
     },
   ];
 
   const wellnessJourney = [
     {
-      title: 'Mood Tracker & Insights',
+      title: '📈 Mood Tracker',
       icon: <TrendingUp className="h-8 w-8" />,
-      subtitle: 'View My Reports',
+      subtitle: 'Monitor your emotional wellness, track mood patterns, and view personalized mental health insights.',
       bg: 'bg-[#8B5CF6]',
       iconColor: 'text-white',
       link: '/mood'
     },
     {
-      title: 'Guided Breathing',
+      title: '🌬️ Guided Breathing',
       icon: <Wind className="h-8 w-8" />,
+      subtitle: 'Practice calming breathing exercises designed to reduce stress, improve focus, and support relaxation.',
       bg: 'bg-[#63A6F0]',
       iconColor: 'text-white',
       link: '/breathing'
     },
     {
-      title: 'Audio Therapy',
+      title: '🎧 Audio Therapy',
       icon: <Headphones className="h-8 w-8" />,
+      subtitle: 'Enjoy soothing music, meditation audio, and relaxing sound experiences for a peaceful mind.',
       bg: 'bg-[#0F6B58]',
       iconColor: 'text-white',
       link: '/audio'
     },
     {
-      title: 'Community Forum',
+      title: '👥 Community Forum',
       icon: <Users className="h-8 w-8" />,
+      subtitle: 'Join a supportive wellness community to share experiences, connect with others, and discuss mental well-being.',
       bg: 'bg-[#0CA588]',
       iconColor: 'text-white',
       link: '/community'
@@ -179,45 +173,41 @@ export function HomePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Quick Access */}
-        <section className="mb-12">
+        <section className="mb-12 rounded-[2rem] bg-[#7C63E9]/10 p-6">
           <h2 className="text-2xl mb-6 text-gray-900 animate-slide-in">Quick Access</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-1 gap-6">
             {quickAccess.map((item, index) => (
-              <Card 
+              <Card
                 key={index}
                 onClick={() => navigate(item.link)}
-                className={`p-6 cursor-pointer transition-all duration-300 group hover:-translate-y-2 animate-fade-in border-0 rounded-2xl shadow-md overflow-hidden ${item.bg}`}
+                className={`relative overflow-hidden p-8 md:p-10 lg:p-12 cursor-pointer rounded-3xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${item.bg}`}
                 style={{ animationDelay: `${index * 0.08}s` }}
               >
-                <div className="flex items-center gap-4">
-                  <div className={`flex-shrink-0 p-4 rounded-xl shadow-lg ${item.iconColor || 'text-purple-600'} bg-white/30 group-hover:scale-110 transition-transform duration-300`}>
-                    {item.icon}
+                <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
+                  <div className="flex-1 max-w-2xl">
+                    <div className="inline-flex items-center rounded-full bg-white/25 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white mb-4 border border-white/30">
+                      Featured Tool
+                    </div>
+                    <h3 className="text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">{item.title}</h3>
+                    <p className="text-lg text-white/95 mb-6">{item.subtitle} with a free personalized emotional blueprint to help you discover emotional patterns.</p>
+                    <button 
+                      onClick={() => navigate(item.link)}
+                      className="text-white font-semibold text-lg hover:text-white/90 transition-colors flex items-center gap-2"
+                    >
+                      Try on your new Face Scan →
+                    </button>
                   </div>
-                  <div>
-                    <h3 className="text-lg text-gray-900 group-hover:text-[#0F6B58] transition-colors font-semibold">{item.title}</h3>
-                    <p className="text-sm text-gray-600">{item.subtitle}</p>
+
+                  <div className="flex-shrink-0 hidden md:flex items-center justify-center">
+                    <img 
+                      src={faceScanImage}
+                      alt="Face Scan Illustration"
+                      className="w-56 h-56 object-contain drop-shadow-2xl"
+                    />
                   </div>
                 </div>
               </Card>
             ))}
-
-            {/* Daily Motivation */}
-            <Card className="p-6 bg-gradient-to-br from-[#E8F7F2] to-[#F6FFF9] rounded-2xl shadow-lg animate-fade-in transition-all duration-300" style={{ animationDelay: '0.2s' }}>
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-lg bg-white/90 shadow-sm">
-                  <Quote className="h-6 w-6 text-[#0F6B58]" />
-                </div>
-                <div>
-                  <h3 className="text-lg mb-2 text-gray-900 font-semibold">Daily Motivation</h3>
-                  <p className="text-sm text-gray-700 mb-2 italic">
-                    Wake up to determination, go to bed your satisfaction.
-                  </p>
-                  <Link to="/mood" className="text-sm text-[#0F6B58] hover:text-[#0F6B58]/90 hover:underline font-medium transition-colors">
-                    View My Reports →
-                  </Link>
-                </div>
-              </div>
-            </Card>
           </div>
         </section>
 

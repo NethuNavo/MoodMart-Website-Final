@@ -48,10 +48,6 @@ export function AuthPage() {
     }
   };
 
-  const handleGuestCheckout = () => {
-    navigate('/shop');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-200 via-purple-100 to-blue-200 flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
@@ -175,15 +171,6 @@ export function AuthPage() {
             )}
           </div>
 
-          {/* Guest Checkout */}
-          <div className="text-center mt-6 pt-6 border-t border-gray-200">
-            <button
-              onClick={handleGuestCheckout}
-              className="text-gray-700 font-medium hover:text-purple-600 transition-colors"
-            >
-              Guest Checkout
-            </button>
-          </div>
         </div>
       </div>
     </div>

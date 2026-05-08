@@ -181,6 +181,11 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+
+  /* Ensure all clickable elements show pointer cursor */
+  button, a, [role="button"], input[type="button"], input[type="submit"], [onclick], .cursor-pointer {
+    cursor: pointer;
+  }
 }
 
 /* When a button is "touched" (clicked / tapped), apply the luxurious purple accent.
@@ -321,8 +326,19 @@ button.touched:hover, a.btn.touched:hover { filter: brightness(0.95); transform:
 }
 
 /* Header refinements */
-.site-header{ padding:14px 0; box-shadow: 0 6px 24px rgba(10,6,20,0.04); transition: box-shadow .18s ease, transform .18s ease; }
-.site-header.scrolled{ box-shadow: 0 18px 60px rgba(10,6,20,0.08); transform: translateY(-1px); }
+.site-header{
+  padding:14px 0;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(15,23,42,0.08);
+  box-shadow: 0 10px 35px rgba(10,6,20,0.08);
+  transition: box-shadow .18s ease, transform .18s ease, background .18s ease;
+}
+.site-header .container {
+  position: relative;
+  z-index: 1;
+}
+.site-header.scrolled{ box-shadow: 0 18px 60px rgba(10,6,20,0.12); transform: translateY(-1px); }
 .site-header .nav-link{ position:relative; overflow:visible }
 .site-header .nav-link::after{ content:''; position:absolute; left:12px; right:12px; height:2px; bottom:-8px; background:transparent; border-radius:4px; transform:scaleX(0); transform-origin:left; transition:transform .18s ease, background .18s ease }
 .site-header .nav-link.active::after, .site-header .nav-link:hover::after { transform:scaleX(1); background: linear-gradient(90deg, var(--lux-primary), rgba(106,47,179,0.7)); }
