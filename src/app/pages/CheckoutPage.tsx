@@ -91,33 +91,6 @@ export function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      // Prepare order data
-      const orderData = {
-        products: cart.map(item => ({
-          productId: item.id,
-          quantity: item.quantity
-        })),
-        total: total,
-        paymentMethod: paymentMethod
-      };
-
-      // Save order to backend
-      const token = localStorage.getItem('authToken');
-      const createOrderResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(orderData)
-      });
-
-      if (!createOrderResponse.ok) {
-        const errorData = await createOrderResponse.json();
-        throw new Error(errorData.error || 'Failed to create order');
-      }
-
-      // If not Stripe, complete the order
       if (paymentMethod !== 'stripe') {
         toast.success('Order placed successfully!');
         setIsProcessing(false);

@@ -215,16 +215,7 @@ const audioTracks = [
     description: 'Peaceful forest sounds for deep meditation',
     color: 'from-purple-400 to-purple-500',
     image: 'https://images.unsplash.com/photo-1656783208368-a7d176736535?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjBuYXR1cmUlMjB0cmVlc3xlbnwxfHx8fDE3NjYzMDYxMDl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'public/audio/audiopapkin-forest-ambience-296528.mp3'
-  },
-  {
-    title: 'Calm & Centered',
-    category: 'Meditation',
-    duration: '5:24',
-    description: 'A gentle track to maintain balance and inner peace.',
-    color: 'from-slate-400 to-slate-500',
-    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+    audioUrl: 'https://cdn.pixabay.com/audio/2022/03/10/audio_4a6bf5a518.mp3'
   },
   {
     title: 'Anxiety Relief Meditation',
@@ -233,7 +224,7 @@ const audioTracks = [
     description: 'Guided meditation specifically designed for anxiety management',
     color: 'from-purple-400 to-pink-500',
     image: 'https://images.unsplash.com/photo-1641391400871-3a6578a11d5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpdGF0aW9uJTIwcGVhY2VmdWwlMjB6ZW58ZW58MXx8fHwxNzY2MzYxMjQ5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'public/audio/Mindfulness+for+Anxiety+and+Stress.mp3'
+    audioUrl: 'https://cdn.pixabay.com/audio/2023/10/23/audio_13c741d5b5.mp3'
   },
   {
     title: 'Sleep Soundly',
@@ -241,8 +232,8 @@ const audioTracks = [
     duration: '30:00',
     description: 'Soothing sounds to help you fall asleep naturally',
     color: 'from-indigo-400 to-purple-500',
-    image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    audioUrl: 'public/audio/kontraa-no-sleep-hiphop-music-473847.mp3'
+    image: 'https://images.unsplash.com/photo-1756058811187-6cfc539fdfa6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbGVlcCUyMG5pZ2h0JTIwbW9vbnxlbnwxfHx8fDE3NjYzNzYyNjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    audioUrl: 'https://cdn.pixabay.com/audio/2022/03/15/audio_13c2e69c00.mp3'
   },
   {
     title: 'Depression Support',
@@ -251,7 +242,7 @@ const audioTracks = [
     description: 'Uplifting guided meditation for managing depression',
     color: 'from-yellow-400 to-orange-500',
     image: 'https://images.unsplash.com/photo-1545500425-a514ded6a000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdW5yaXNlJTIwcGVhY2VmdWwlMjBuYXR1cmV8ZW58MXx8fHwxNzY2Mzc2MjY4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'public/audio/intensity-by-audio-club-intensity-by-audio-club-343637.mp3'
+    audioUrl: 'https://cdn.pixabay.com/audio/2022/11/22/audio_4eb166d25e.mp3'
   },
   {
     title: 'Rain & Thunder',
@@ -260,43 +251,7 @@ const audioTracks = [
     description: 'Natural rain and distant thunder for ultimate relaxation',
     color: 'from-gray-400 to-slate-500',
     image: 'https://images.unsplash.com/photo-1664976694406-3e9f37768a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyYWluJTIwc3Rvcm0lMjBjbG91ZHN8ZW58MXx8fHwxNzY2Mzc2MjY4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'public/audio/johnbritton-thunder-156423.mp3'
-  },
-  {
-    title: 'Mindful Morning',
-    category: 'Wellness',
-    duration: '18:32',
-    description: 'A gentle audio experience to start your day grounded and calm.',
-    color: 'from-emerald-400 to-sky-500',
-    image: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    audioUrl: 'public/audio/creative_spark-morning-birdsong-246402.mp3'
-  },
-  {
-    title: 'Deep Breath Journey',
-    category: 'Meditation',
-    duration: '22:18',
-    description: 'Breathing cues and soft soundscapes for deep relaxation and focus.',
-    color: 'from-blue-400 to-indigo-500',
-    image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    audioUrl: 'public/audio/white_records-breath-of-autumn-instrumental-background-music-for-video-46-sec-487275 (1).mp3'
-  },
-  {
-    title: 'Nighttime Calm',
-    category: 'Sleep',
-    duration: '28:40',
-    description: 'Soft ambient tones and lullaby waves to wind down your evening.',
-    color: 'from-slate-400 to-slate-600',
-    image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    audioUrl: 'public/audio/freesound_community-calm-music-64526.mp3'
-  },
-  {
-    title: 'Mental Wellness Soundscape',
-    category: 'Wellness',
-    duration: '20:00',
-    description: 'A soothing soundscape designed to support mental clarity and emotional balance.',
-    color: 'from-teal-400 to-cyan-500',
-    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    audioUrl: 'public/audio/joelfazhari-aquarium-ambience-sounds-10-min-193236.mp3'
+    audioUrl: 'https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3'
   },
 ];
 require('dotenv').config();
@@ -304,6 +259,7 @@ require('dotenv').config();
 const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mernapp';
 
 const products = [
+  [
   {
     "id": "1",
     "name": "Mindfulness Journal",
@@ -388,6 +344,7 @@ const products = [
     "description": "Ultrasonic diffuser with LED lighting",
     "image": "https://images.unsplash.com/photo-1707920961189-290d19b363f3?w=400&h=300&fit=crop"
   }
+]
 ];
 
 const users = [

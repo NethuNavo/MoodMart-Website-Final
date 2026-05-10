@@ -94,7 +94,7 @@ export function AudioTherapyPage() {
       description: 'A gentle audio experience to start your day grounded and calm.',
       color: 'from-emerald-400 to-sky-500',
       image: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      audioUrl: 'public/audio/creative_spark-morning-birdsong-246402.mp3'
+      audioUrl: 'https://cdn.pixabay.com/audio/2022/04/14/audio_3d5c8bf3d3.mp3'
     },
     {
       id: 9,
@@ -104,7 +104,7 @@ export function AudioTherapyPage() {
       description: 'Breathing cues and soft soundscapes for deep relaxation and focus.',
       color: 'from-blue-400 to-indigo-500',
       image: new URL('../../assets/deep.jpg', import.meta.url).href,
-      audioUrl: 'public/audio/white_records-breath-of-autumn-instrumental-background-music-for-video-46-sec-487275 (1).mp3'
+      audioUrl: 'https://cdn.pixabay.com/audio/2022/02/02/audio_5d708d2860.mp3'
     },
     {
       id: 10,
@@ -114,7 +114,7 @@ export function AudioTherapyPage() {
       description: 'Soft ambient tones and lullaby waves to wind down your evening.',
       color: 'from-slate-400 to-slate-600',
       image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      audioUrl: 'public/audio/freesound_community-calm-music-64526.mp3'
+      audioUrl: 'https://cdn.pixabay.com/audio/2022/07/08/audio_0cce7461d3.mp3'
     },
     {
       id: 11,
@@ -124,7 +124,7 @@ export function AudioTherapyPage() {
       description: 'A soothing soundscape designed to support mental clarity and emotional balance.',
       color: 'from-teal-400 to-cyan-500',
       image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      audioUrl: 'public/audio/joelfazhari-aquarium-ambience-sounds-10-min-193236.mp3'
+      audioUrl: 'https://cdn.pixabay.com/audio/2022/05/12/audio_1f6d623d74.mp3'
     },
   ];
 
