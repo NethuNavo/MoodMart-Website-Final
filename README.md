@@ -62,7 +62,7 @@ PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/mernapp
 JWT_SECRET=your_jwt_secret_here
 STRIPE_SECRET_KEY=sk_test_...
-CLIENT_URL=http://localhost:5173
+CLIENT_URL=http://localhost:5174
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_gmail_app_password
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -85,7 +85,7 @@ npm run dev
 Open the app at:
 
 ```bash
-http://localhost:5173
+http://localhost:5174
 ```
 
 If the backend runs elsewhere, configure `VITE_API_URL` in your environment settings.
