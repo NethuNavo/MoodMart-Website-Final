@@ -8,5 +8,8 @@
       "entrypoint": "backend",
       "routePrefix": "/_/backend"
     }
+  },
+  "env": {
+    "VITE_API_URL": "/_/backend"
   }
 }

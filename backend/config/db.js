@@ -1,16 +1,22 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    const msg = 'MONGO_URI environment variable is not set';
+    console.error(msg);
+    throw new Error(msg);
+  }
+
   try {
-    const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mernapp';
     await mongoose.connect(uri, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     });
     console.log('MongoDB connected');
   } catch (err) {
-    console.error(err.message);
-    process.exit(1);
+    console.error('MongoDB connection error:', err.message || err);
+    throw err;
   }
 };
 

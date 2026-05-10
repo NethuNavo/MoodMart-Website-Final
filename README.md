@@ -90,7 +90,17 @@ http://localhost:5174
 
 If the backend runs elsewhere, configure `VITE_API_URL` in your environment settings.
 
-For Vercel deployment with the backend service enabled, set `VITE_API_URL` to `/_/backend` in Vercel environment variables, or let the app default to `/_/backend` in production.
+For Vercel deployment, the following environment variables must also be configured:
+
+- `MONGO_URI` — remote MongoDB connection string
+- `JWT_SECRET` — JWT signing secret
+- `CLIENT_URL` — your deployed frontend URL, e.g. `https://your-app.vercel.app`
+- `STRIPE_SECRET_KEY` — Stripe secret key
+- `EMAIL_USER` — SMTP sender email
+- `EMAIL_PASS` — SMTP app password
+- `STRIPE_WEBHOOK_SECRET` — Stripe webhook secret
+
+If you set `VITE_API_URL` to `/_/backend`, the frontend will use the Vercel backend service route automatically.
 
 ## 💳 Stripe Payment Flow
 
