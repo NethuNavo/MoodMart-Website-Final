@@ -51,36 +51,44 @@ export const authAPI = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify(data),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.msg || 'Registration failed');
+      let errorMessage = 'Registration failed';
+      try {
+        const error = await response.json();
+        errorMessage = error.msg || JSON.stringify(error);
+      } catch {
+        errorMessage = await response.text();
+      }
+      throw new Error(errorMessage || 'Registration failed');
     }
 
     return response.json();
   },
 
   async login(data: LoginRequest): Promise<AuthResponse> {
-    console.log('Login attempt with email:', data.email);
-    console.log('API URL:', `${API_BASE_URL}/api/auth/login`);
-    
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify(data),
     });
 
-    console.log('Login response status:', response.status);
-    
     if (!response.ok) {
-      const error = await response.json();
-      console.error('Login error response:', error);
-      throw new Error(error.msg || 'Login failed');
+      let errorMessage = 'Login failed';
+      try {
+        const error = await response.json();
+        errorMessage = error.msg || JSON.stringify(error);
+      } catch {
+        errorMessage = await response.text();
+      }
+      throw new Error(errorMessage || 'Login failed');
     }
 
     return response.json();
@@ -162,6 +170,7 @@ export async function apiCall<T>(
   const token = tokenManager.getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
     ...(options?.headers as Record<string, string>),
   };
 
@@ -175,8 +184,25 @@ export async function apiCall<T>(
   });
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+    try {
+      const error = await response.json();
+      errorMessage = error.msg || JSON.stringify(error);
+    } catch {
+      const text = await response.text();
+      if (text) errorMessage = text;
+    }
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  const responseText = await response.text();
+  if (!responseText) {
+    return {} as T;
+  }
+
+  try {
+    return JSON.parse(responseText) as T;
+  } catch (err) {
+    throw new Error(`Invalid JSON response: ${responseText}`);
+  }
 }
