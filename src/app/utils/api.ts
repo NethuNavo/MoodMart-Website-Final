@@ -84,7 +84,7 @@ export const authAPI = {
       let errorMessage = 'Login failed';
       try {
         const error = await response.json();
-        errorMessage = error.msg || JSON.stringify(error);
+        errorMessage = error.msg || error.message || error.error?.message || JSON.stringify(error);
       } catch {
         errorMessage = await response.text();
       }
@@ -187,7 +187,7 @@ export async function apiCall<T>(
     let errorMessage = `API Error: ${response.status} ${response.statusText}`;
     try {
       const error = await response.json();
-      errorMessage = error.msg || JSON.stringify(error);
+      errorMessage = error.msg || error.message || error.error?.message || JSON.stringify(error);
     } catch {
       const text = await response.text();
       if (text) errorMessage = text;
