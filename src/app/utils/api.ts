@@ -1,5 +1,15 @@
 // Backend API configuration and helpers
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const rawApiUrl = import.meta.env.VITE_API_URL?.toString().trim();
+const defaultApiUrl = import.meta.env.DEV ? 'http://localhost:5000' : '/_/backend';
+export const API_BASE_URL = rawApiUrl
+  ? rawApiUrl.startsWith(':')
+    ? `http://localhost${rawApiUrl}`
+    : rawApiUrl.startsWith('http://') || rawApiUrl.startsWith('https://')
+    ? rawApiUrl
+    : rawApiUrl.startsWith('/')
+    ? rawApiUrl
+    : `http://${rawApiUrl}`
+  : defaultApiUrl;
 
 export interface AuthResponse {
   token: string;
@@ -54,6 +64,9 @@ export const authAPI = {
   },
 
   async login(data: LoginRequest): Promise<AuthResponse> {
+    console.log('Login attempt with email:', data.email);
+    console.log('API URL:', `${API_BASE_URL}/api/auth/login`);
+    
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -62,8 +75,11 @@ export const authAPI = {
       body: JSON.stringify(data),
     });
 
+    console.log('Login response status:', response.status);
+    
     if (!response.ok) {
       const error = await response.json();
+      console.error('Login error response:', error);
       throw new Error(error.msg || 'Login failed');
     }
 

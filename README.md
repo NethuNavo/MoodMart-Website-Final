@@ -90,6 +90,8 @@ http://localhost:5174
 
 If the backend runs elsewhere, configure `VITE_API_URL` in your environment settings.
 
+For Vercel deployment with the backend service enabled, set `VITE_API_URL` to `/_/backend` in Vercel environment variables, or let the app default to `/_/backend` in production.
+
 ## 💳 Stripe Payment Flow
 
 * Checkout creates a Stripe session through `/api/payments/create-checkout-session`
