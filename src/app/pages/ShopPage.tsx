@@ -1,13 +1,12 @@
 /// <reference types="vite/client" />
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ShoppingCart, Star, Filter, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { useMood } from '../context/MoodContext';
+import { useMood, Product } from '../context/MoodContext';
 import { MiniCart } from '../components/MiniCart';
 import ProductDetailsModal from '../components/ProductDetailsModal';
 import { GuestInfoBanner } from '../components/GuestInfoBanner';
-import { Product } from '../context/MoodContext';
 const wellnessDesign = new URL('../../assets/4b30ac2453362cc9d4add552f78ebd7948229050.png', import.meta.url).href;
 const gratitudeImg = new URL('../../assets/gratitude.png', import.meta.url).href;
 
@@ -19,35 +18,10 @@ export function ShopPage() {
   const [isMiniCartOpen, setIsMiniCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<(Product & { rating: number; reviews: number; tag?: string }) | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { addToCart, isAuthenticated } = useMood();
+  const { addToCart, isAuthenticated, products, isProductsLoading } = useMood();
 
-  const [products, setProducts] = useState<(Product & { rating: number; reviews: number; tag?: string })[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const API_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:5000/api';
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_URL}/products`);
-      if (!response.ok) throw new Error('Failed to fetch products');
-      const data = await response.json();
-      // normalize _id -> id if needed
-      const normalized = data.map((p: any) => ({ ...p, id: p._id || p.id }));
-      setProducts(normalized);
-    } catch (err) {
-      console.error('Error fetching shop products', err);
-      toast.error('Unable to load products');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const staticProducts: (Product & { rating: number; reviews: number; tag?: string })[] = products;
+  const shouldShowLoading = isProductsLoading;
 
   const categories = [
     { id: 'all', label: 'All Products' },
@@ -83,13 +57,18 @@ export function ShopPage() {
     }, 2500);
   };
 
-  const handleViewDetails = (product: (Product & { rating: number; reviews: number; tag?: string })) => {
-    setSelectedProduct(product);
+  const handleViewDetails = (product: Product) => {
+    setSelectedProduct({
+      ...product,
+      rating: product.rating ?? 0,
+      reviews: product.reviews ?? 0,
+      tag: product.tag,
+    });
     setIsModalOpen(true);
   };
 
   // prepare product cards once to avoid JSX parsing complexity
-  const productCards = loading ? (
+  const productCards = shouldShowLoading ? (
     <div className="col-span-full text-center py-12 text-gray-500">Loading products...</div>
   ) : (
     filteredProducts.map((product) => {

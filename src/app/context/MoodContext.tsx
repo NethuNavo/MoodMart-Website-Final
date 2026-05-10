@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { productAPI } from '../utils/api';
 
 export interface MoodEntry {
   id: string;
@@ -59,14 +60,16 @@ interface MoodContextType {
   clearCart: () => void;
   isAuthenticated: boolean;
   currentUser: User | null;
-  login: (email: string) => User | null;
+  login: (user: User) => User | null;
   logout: () => void;
   currentTheme: string;
   setCurrentTheme: (theme: string) => void;
   products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  updateProduct: (id: string, product: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
+  isProductsLoading: boolean;
+  loadProducts: () => Promise<Product[]>;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<Product | null>;
+  updateProduct: (id: string, product: Partial<Product>) => Promise<Product | null>;
+  deleteProduct: (id: string) => Promise<void>;
   orders: Order[];
   updateOrderStatus: (id: string, status: Order['status']) => void;
   users: User[];
@@ -240,6 +243,7 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   // Mock Users
+  const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([
     { id: '1', name: 'Admin User', email: 'admin@moodmart.com', role: 'admin', status: 'active', joinDate: '2025-01-01' },
     { id: '2', name: 'Sarah Johnson', email: 'sarah.j@example.com', role: 'user', status: 'active', joinDate: '2025-11-15' },
@@ -255,6 +259,31 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
     };
     setMoodEntries([...moodEntries, newEntry]);
   };
+
+  const loadProducts = useCallback(async (): Promise<Product[]> => {
+    setIsProductsLoading(true);
+    try {
+      const backendProducts = await productAPI.getAll();
+      const normalizedProducts = backendProducts.map((product: any) => ({
+        ...product,
+        id: product._id || product.id,
+        stock: product.stock ?? 0,
+      }));
+      setProducts(normalizedProducts);
+      return normalizedProducts;
+    } catch (err) {
+      console.error('Failed to load backend products', err);
+      return [];
+    } finally {
+      setIsProductsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProducts().catch(() => {
+      // Ignore load errors here; keep fallback products available.
+    });
+  }, [loadProducts]);
 
   const addToCart = (product: Product) => {
     const existingItem = cart.find(item => item.id === product.id);
@@ -287,28 +316,10 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
     setCart([]);
   };
 
-  const login = (email: string) => {
-    // Find user in our mock database
-    const user = users.find(u => u.email === email && u.status === 'active');
-    
-    if (user) {
-      setIsAuthenticated(true);
-      setCurrentUser(user);
-      return user;
-    }
-    
-    // Fallback for demo purposes if email not in list (treat as new user)
-    const newUser: User = {
-        id: Date.now().toString(),
-        name: 'New User',
-        email: email,
-        role: 'user',
-        status: 'active',
-        joinDate: new Date().toISOString().split('T')[0]
-    };
+  const login = (user: User) => {
     setIsAuthenticated(true);
-    setCurrentUser(newUser);
-    return newUser;
+    setCurrentUser(user);
+    return user;
   };
 
   const logout = () => {
@@ -316,23 +327,31 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
     setCurrentUser(null);
   };
 
-  const addProduct = (product: Omit<Product, 'id'>) => {
-    const newProduct = {
-        ...product,
-        id: Date.now().toString(),
-        rating: 0,
-        reviews: 0,
-        stock: product.stock || 0
+  const addProduct = async (product: Omit<Product, 'id'>) => {
+    const created = await productAPI.create(product);
+    const normalizedProduct: Product = {
+      ...created,
+      id: created._id || created.id,
+      stock: created.stock ?? 0,
     };
-    setProducts([...products, newProduct]);
+    setProducts(prev => [...prev, normalizedProduct]);
+    return normalizedProduct;
   };
 
-  const updateProduct = (id: string, updatedProduct: Partial<Product>) => {
-    setProducts(products.map(p => p.id === id ? { ...p, ...updatedProduct } : p));
+  const updateProduct = async (id: string, updatedProduct: Partial<Product>) => {
+    const updated = await productAPI.update(id, updatedProduct);
+    const normalizedProduct: Product = {
+      ...updated,
+      id: updated._id || updated.id,
+      stock: updated.stock ?? 0,
+    };
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...normalizedProduct } : p));
+    return normalizedProduct;
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts(products.filter(p => p.id !== id));
+  const deleteProduct = async (id: string) => {
+    await productAPI.delete(id);
+    setProducts(prev => prev.filter(p => p.id !== id));
   };
 
   const updateOrderStatus = (id: string, status: Order['status']) => {
@@ -364,6 +383,8 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
         currentTheme,
         setCurrentTheme,
         products,
+        isProductsLoading,
+        loadProducts,
         addProduct,
         updateProduct,
         deleteProduct,

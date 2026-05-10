@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { authAPI, tokenManager } from '../utils/api';
 
 export type UserType = 'guest' | 'registered';
 export type UserRole = 'user' | 'admin';
@@ -19,7 +20,7 @@ export interface UserContextType {
   isRegistered: boolean;
   isAdmin: boolean;
   registerUser: (userData: { name: string; email: string; password: string }) => void;
-  loginUser: (email: string, password: string) => void;
+  loginUser: (userData: { id?: string; name: string; email: string; role: UserRole; hasCompletedOrder?: boolean }) => void;
   logoutUser: () => void;
   convertGuestToRegistered: () => void;
   markOrderComplete: () => void;
@@ -36,11 +37,44 @@ export function useUser() {
 }
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User>({
-    userType: 'guest',
-    role: 'user',
-    hasCompletedOrder: false,
+  // Initialize from localStorage
+  const [user, setUser] = useState<User>(() => {
+    const stored = localStorage.getItem('moodmart_user');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return {
+      userType: 'guest',
+      role: 'user',
+      hasCompletedOrder: false,
+    };
   });
+
+  useEffect(() => {
+    const token = tokenManager.getToken();
+    const stored = localStorage.getItem('moodmart_user');
+
+    if (stored || !token) return;
+
+    authAPI.getProfile(token)
+      .then((response) => {
+        const profile = response.user;
+        const loadedUser: User = {
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          userType: 'registered',
+          role: profile.role as UserRole,
+          hasCompletedOrder: true,
+        };
+        setUser(loadedUser);
+        localStorage.setItem('moodmart_user', JSON.stringify(loadedUser));
+      })
+      .catch(() => {
+        tokenManager.removeToken();
+        localStorage.removeItem('moodmart_user');
+      });
+  }, []);
 
   const isAdmin = user.role === 'admin' || user.email === 'admin@moodmart.com';
 
@@ -48,47 +82,57 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const isRegistered = user.userType === 'registered';
 
   const registerUser = (userData: { name: string; email: string; password: string }) => {
-    setUser({
+    const newUser: User = {
       id: Date.now().toString(),
       name: userData.name,
       email: userData.email,
       userType: 'registered',
       role: userData.email === 'admin@moodmart.com' ? 'admin' : 'user',
       hasCompletedOrder: user.hasCompletedOrder,
-    });
+    };
+    setUser(newUser);
+    localStorage.setItem('moodmart_user', JSON.stringify(newUser));
   };
 
-  const loginUser = (email: string, password: string) => {
-    // Mock login - in real app would verify credentials
-    setUser({
-      id: Date.now().toString(),
-      name: 'John Doe',
-      email: email,
+  const loginUser = (userData: { id?: string; name: string; email: string; role: UserRole; hasCompletedOrder?: boolean }) => {
+    const newUser: User = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
       userType: 'registered',
-      role: email === 'admin@moodmart.com' ? 'admin' : 'user',
-      hasCompletedOrder: true,
-    });
+      role: userData.role,
+      hasCompletedOrder: userData.hasCompletedOrder ?? true,
+    };
+    setUser(newUser);
+    localStorage.setItem('moodmart_user', JSON.stringify(newUser));
   };
 
   const logoutUser = () => {
-    setUser({
+    const guest: User = {
       userType: 'guest',
       hasCompletedOrder: false,
-    });
+    };
+    setUser(guest);
+    tokenManager.removeToken();
+    localStorage.removeItem('moodmart_user');
   };
 
   const convertGuestToRegistered = () => {
-    setUser({
+    const updatedUser = {
       ...user,
-      userType: 'registered',
-    });
+      userType: 'registered' as UserType,
+    };
+    setUser(updatedUser);
+    localStorage.setItem('moodmart_user', JSON.stringify(updatedUser));
   };
 
   const markOrderComplete = () => {
-    setUser({
+    const updatedUser = {
       ...user,
       hasCompletedOrder: true,
-    });
+    };
+    setUser(updatedUser);
+    localStorage.setItem('moodmart_user', JSON.stringify(updatedUser));
   };
 
   return (

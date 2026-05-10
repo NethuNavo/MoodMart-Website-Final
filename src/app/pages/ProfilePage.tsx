@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useMood } from '../context/MoodContext';
+import { useUser } from '../context/UserContext';
 import { 
   User, Calendar, 
   Edit, Camera, Mail,
@@ -13,12 +14,22 @@ const profileHeaderImage = new URL('../../assets/c1c22aeaf747e6e647054c44eeb1adb
 
 export function ProfilePage() {
   const { logout } = useMood();
+  const { user, logoutUser } = useUser();
   const navigate = useNavigate();
 
   // Profile/settings state
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState(user.name || '');
+  const [email, setEmail] = useState(user.email || '');
+
+  useEffect(() => {
+    setName(user.name || '');
+    setEmail(user.email || '');
+  }, [user]);
+  
+  const userName = user.name || 'User';
+  const userEmail = user.email || 'user@email.com';
+  const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -42,6 +53,7 @@ export function ProfilePage() {
   };
 
   const handleLogout = () => {
+    logoutUser();
     logout();
     toast.success('Logged out successfully');
     navigate('/');
@@ -49,8 +61,9 @@ export function ProfilePage() {
 
   const handleDeleteAccount = () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      toast.success('Account deleted');
+      logoutUser();
       logout();
+      toast.success('Account deleted');
       navigate('/');
     }
   };
@@ -86,7 +99,7 @@ export function ProfilePage() {
               {/* Avatar */}
               <div className="relative">
                 <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center text-purple-600 text-4xl font-bold shadow-xl lux-elevated">
-                  JD
+                  {initials}
                 </div>
                 <button className="absolute bottom-0 right-0 bg-teal-500 hover:bg-teal-600 text-white p-2 rounded-full shadow-lg transition-colors">
                   <Camera className="h-4 w-4" />
@@ -95,11 +108,11 @@ export function ProfilePage() {
 
               {/* User Info */}
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-4xl mb-2 lux-heading">John Doe</h1>
+                <h1 className="text-4xl mb-2 lux-heading">{userName}</h1>
                 <div className="flex flex-col md:flex-row gap-4 text-white/90 mb-4">
                   <div className="flex items-center gap-2 justify-center md:justify-start">
                     <Mail className="h-4 w-4" />
-                    <span>john.doe@email.com</span>
+                    <span>{userEmail}</span>
                   </div>
                   <div className="flex items-center gap-2 justify-center md:justify-start">
                     <Calendar className="h-4 w-4" />

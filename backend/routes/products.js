@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 // Get single product by ID
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findOne({ id: req.params.id });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
@@ -62,7 +62,7 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { name, category, price, description, image, tag, rating, reviews } = req.body;
     
-    let product = await Product.findById(req.params.id);
+    let product = await Product.findOne({ id: req.params.id });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
@@ -88,7 +88,7 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
 // Delete product (admin only)
 router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findOneAndDelete({ id: req.params.id });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }

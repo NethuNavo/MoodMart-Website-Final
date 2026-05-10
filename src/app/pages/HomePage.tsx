@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Camera, TrendingUp, Headphones, Wind, Users } from 'lucide-react';
+import { Camera, TrendingUp, Headphones, Wind, Users, Smile, Heart } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -8,7 +8,7 @@ import { useNotification } from '../context/NotificationContext';
 import { useMood } from '../context/MoodContext';
 const heroImage = new URL('../../assets/e8741628041c196123a6d53ca1d67a561fc66035.png', import.meta.url).href;
 const heroBannerImage = new URL('../../assets/683421661700aa65fdf714555327e8a9830b3ffb.png', import.meta.url).href;
-const wellnessDesign = new URL('../../assets/4b30ac2453362cc9d4add552f78ebd7948229050.png', import.meta.url).href;
+const wellnessDesign = new URL('../../assets/home motivate.jpg', import.meta.url).href;
 const guidedBreathingImage = new URL('../../assets/56deb1cbc104300eab46909bff0b6ae29dd296b8.png', import.meta.url).href;
 const facialRecognitionImage = new URL('../../assets/8679d179690d05cf96d9ad060eee651464a381ff.png', import.meta.url).href;
 const faceScanImage = new URL('../../assets/face scan.png', import.meta.url).href;
@@ -51,35 +51,39 @@ export function HomePage() {
 
   const wellnessJourney = [
     {
-      title: '📈 Mood Tracker',
+      title: 'Mood Tracker',
       icon: <TrendingUp className="h-8 w-8" />,
-      subtitle: 'Monitor your emotional wellness, track mood patterns, and view personalized mental health insights.',
-      bg: 'bg-[#8B5CF6]',
-      iconColor: 'text-white',
+      subtitle: 'Track your emotions, spot patterns, and gain insights to feel your best.',
+      cta: 'Track Your Mood',
+      bg: 'from-[#E9D5FF] to-[#C4B5FD]',
+      iconBg: 'bg-[#7C3AED] text-white',
       link: '/mood'
     },
     {
-      title: '🌬️ Guided Breathing',
+      title: 'Guided Breathing',
       icon: <Wind className="h-8 w-8" />,
-      subtitle: 'Practice calming breathing exercises designed to reduce stress, improve focus, and support relaxation.',
-      bg: 'bg-[#63A6F0]',
-      iconColor: 'text-white',
+      subtitle: 'Practice calming breathing exercises to reduce stress and find your center.',
+      cta: 'Start Breathing',
+      bg: 'from-[#DBEAFE] to-[#93C5FD]',
+      iconBg: 'bg-[#2563EB] text-white',
       link: '/breathing'
     },
     {
-      title: '🎧 Audio Therapy',
+      title: 'Audio Therapy',
       icon: <Headphones className="h-8 w-8" />,
-      subtitle: 'Enjoy soothing music, meditation audio, and relaxing sound experiences for a peaceful mind.',
-      bg: 'bg-[#0F6B58]',
-      iconColor: 'text-white',
+      subtitle: 'Relax with soothing music, meditations, and sounds for a peaceful mind.',
+      cta: 'Listen Now',
+      bg: 'from-[#D1FAE5] to-[#6EE7B7]',
+      iconBg: 'bg-[#047857] text-white',
       link: '/audio'
     },
     {
-      title: '👥 Community Forum',
+      title: 'Community Forum',
       icon: <Users className="h-8 w-8" />,
-      subtitle: 'Join a supportive wellness community to share experiences, connect with others, and discuss mental well-being.',
-      bg: 'bg-[#0CA588]',
-      iconColor: 'text-white',
+      subtitle: 'Connect with others, share experiences, and support your wellness journey together.',
+      cta: 'Join the Community',
+      bg: 'from-[#FFEDD5] to-[#FDBA74]',
+      iconBg: 'bg-[#C2410C] text-white',
       link: '/community'
     },
   ];
@@ -173,66 +177,97 @@ export function HomePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Quick Access */}
-        <section className="mb-12 rounded-[2rem] bg-[#7C63E9]/10 p-6">
+        <section className="mb-12">
           <h2 className="text-2xl mb-6 text-gray-900 animate-slide-in">Quick Access</h2>
-          <div className="grid md:grid-cols-1 gap-6">
-            {quickAccess.map((item, index) => (
-              <Card
-                key={index}
-                onClick={() => navigate(item.link)}
-                className={`relative overflow-hidden p-8 md:p-10 lg:p-12 cursor-pointer rounded-3xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${item.bg}`}
-                style={{ animationDelay: `${index * 0.08}s` }}
-              >
-                <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
-                  <div className="flex-1 max-w-2xl">
-                    <div className="inline-flex items-center rounded-full bg-white/25 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white mb-4 border border-white/30">
-                      Featured Tool
-                    </div>
-                    <h3 className="text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">{item.title}</h3>
-                    <p className="text-lg text-white/95 mb-6">{item.subtitle} with a free personalized emotional blueprint to help you discover emotional patterns.</p>
-                    <button 
-                      onClick={() => navigate(item.link)}
-                      className="text-white font-semibold text-lg hover:text-white/90 transition-colors flex items-center gap-2"
-                    >
-                      Try on your new Face Scan →
-                    </button>
-                  </div>
+          <div className="rounded-[2rem] bg-[#7C63E9]/10 p-4">
+            <Card
+              onClick={() => navigate('/face-scan')}
+              className="relative overflow-hidden p-6 md:p-8 rounded-[1.75rem] shadow-2xl bg-gradient-to-br from-[#8157F8] via-[#A178FF] to-[#D8ABFF] text-white"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.35),_transparent_35%)] opacity-70 pointer-events-none" />
+              <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.9fr] items-center">
+                <div className="space-y-5">
+                  <span className="inline-flex rounded-full bg-white/15 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.35em] text-white/90 border border-white/20">
+                    Featured Tool
+                  </span>
+                  <h3 className="text-4xl md:text-5xl font-semibold tracking-tight">Face Scan</h3>
+                  <p className="text-base md:text-lg text-white/85 max-w-xl leading-relaxed">
+                    Scan Camera with a free personalized emotional blueprint to help you discover emotional patterns.
+                  </p>
 
-                  <div className="flex-shrink-0 hidden md:flex items-center justify-center">
-                    <img 
+                  <button
+                    onClick={() => navigate('/face-scan')}
+                    className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-[#4B3DCB] shadow-lg shadow-white/20 transition hover:bg-white/90"
+                  >
+                    Try on your new Face Scan →
+                  </button>
+                </div>
+
+                <div className="flex justify-center lg:justify-end">
+                  <div className="relative w-full max-w-sm">
+                    <img
                       src={faceScanImage}
                       alt="Face Scan Illustration"
-                      className="w-56 h-56 object-contain drop-shadow-2xl"
+                      className="w-full h-auto rounded-[1.75rem] object-cover shadow-2xl"
                     />
                   </div>
                 </div>
-              </Card>
-            ))}
+              </div>
+            </Card>
           </div>
         </section>
 
         {/* Your Wellness Journey */}
         <section className="mb-12">
-          <h2 className="text-2xl mb-6 text-gray-900 animate-slide-in">Your Wellness Journey</h2>
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <p className="text-sm uppercase tracking-[0.3em] text-purple-600 font-semibold mb-4">Your Wellness Journey</p>
+            <h2 className="text-4xl md:text-5xl font-semibold text-slate-900 mb-4">Your Wellness Journey</h2>
+            <p className="text-base md:text-lg text-slate-600">
+              Explore personalized tools and activities designed to support your mental well-being every step of the way.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {wellnessJourney.map((item, index) => (
-              <Card 
+              <Card
                 key={index}
                 onClick={() => navigate(item.link)}
-                className={`p-8 cursor-pointer transition-all duration-300 group hover:shadow-2xl rounded-2xl overflow-hidden ${item.bg} hover:scale-102`}
+                className={`rounded-[2rem] overflow-hidden p-8 cursor-pointer transition-all duration-300 shadow-xl hover:-translate-y-1 bg-gradient-to-br ${item.bg}`}
                 style={{ animationDelay: `${index * 0.08}s` }}
               >
-                <div className="flex flex-col items-start h-full justify-between">
-                  <div className="flex items-center justify-center w-14 h-14 rounded-lg mb-4 bg-white/20 shadow-inner">
-                    <div className={`${item.iconColor || 'text-purple-600'} text-2xl`}>{item.icon}</div>
-                  </div>
+                <div className="flex h-full flex-col justify-between">
                   <div>
-                    <h3 className={`${item.iconColor === 'text-white' ? 'text-white' : 'text-gray-900'} text-lg font-semibold mb-2`}>{item.title}</h3>
-                    {item.subtitle && <p className={`text-sm ${item.iconColor === 'text-white' ? 'text-white/90' : 'text-[#0F6B58]'} font-medium`}>{item.subtitle}</p>}
+                    <div className={`inline-flex items-center justify-center rounded-3xl p-4 mb-6 ${item.iconBg}`}>
+                      {item.icon}
+                    </div>
+                    <h3 className="text-2xl font-semibold text-slate-900 mb-3">{item.title}</h3>
+                    <p className="text-sm text-slate-600 mb-8 leading-7">{item.subtitle}</p>
                   </div>
+                  <button className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100">
+                    {item.cta}
+                  </button>
                 </div>
               </Card>
             ))}
+          </div>
+
+          <div className="mt-10 rounded-[2rem] border border-purple-200/70 bg-gradient-to-r from-white via-purple-50 to-teal-50 p-8 shadow-2xl ring-1 ring-purple-100/70 flex flex-col gap-8 lg:flex-row lg:items-center">
+            <div className="flex-1">
+              <p className="text-sm uppercase tracking-[0.3em] text-purple-800 font-semibold mb-4">Daily encouragement</p>
+              <p className="text-3xl md:text-4xl font-semibold text-slate-900 leading-tight">
+                Small steps every day lead to big changes. You’ve got this! ♡
+              </p>
+              <p className="mt-4 text-sm md:text-base text-slate-600 max-w-xl">
+                Relax, reflect, and keep moving forward with gentle support from your wellness tools and community.
+              </p>
+            </div>
+            <div className="w-full max-w-md mx-auto lg:mx-0">
+              <ImageWithFallback
+                src={wellnessDesign}
+                alt="Wellness illustration"
+                className="w-full h-auto rounded-[2rem] object-cover shadow-2xl border border-white/80"
+              />
+            </div>
           </div>
         </section>
 

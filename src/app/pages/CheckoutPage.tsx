@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMood } from '../context/MoodContext';
+import { useUser } from '../context/UserContext';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -26,6 +27,7 @@ const checkoutBanner = new URL('../../assets/checkout-banner.png', import.meta.u
 
 export function CheckoutPage() {
   const { cart, isAuthenticated } = useMood();
+  const { user } = useUser();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -33,8 +35,8 @@ export function CheckoutPage() {
   // Form states
   const [formData, setFormData] = useState({
     // Shipping details
-    fullName: '',
-    email: '',
+    fullName: user?.name || '',
+    email: user?.email || '',
     phone: '',
     address: '',
     city: '',
@@ -47,6 +49,16 @@ export function CheckoutPage() {
     // Bank transfer
     bankSlip: null as File | null,
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: user.name || prev.fullName,
+        email: user.email || prev.email,
+      }));
+    }
+  }, [user]);
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shipping = subtotal > 5000 ? 0 : 300;
@@ -79,6 +91,33 @@ export function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      // Prepare order data
+      const orderData = {
+        products: cart.map(item => ({
+          productId: item.id,
+          quantity: item.quantity
+        })),
+        total: total,
+        paymentMethod: paymentMethod
+      };
+
+      // Save order to backend
+      const token = localStorage.getItem('authToken');
+      const createOrderResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!createOrderResponse.ok) {
+        const errorData = await createOrderResponse.json();
+        throw new Error(errorData.error || 'Failed to create order');
+      }
+
+      // If not Stripe, complete the order
       if (paymentMethod !== 'stripe') {
         toast.success('Order placed successfully!');
         setIsProcessing(false);

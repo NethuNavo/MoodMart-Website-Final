@@ -9,7 +9,7 @@ const logo = new URL('../../assets/0b38a103a78cc9cd2458edca47c9ee2cf8746513.png'
 export function Header() {
   const location = useLocation();
   const { cart, isAuthenticated, logout } = useMood();
-  const { isAdmin } = useUser();
+  const { isAdmin, logoutUser } = useUser();
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [isMiniCartOpen, setIsMiniCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -111,7 +111,7 @@ export function Header() {
                   <Link to="/profile" className="text-gray-600 hover:text-purple-600 transition-all duration-300 hover:scale-110">
                     <User className="h-6 w-6" />
                   </Link>
-                  <button onClick={logout} className="text-gray-600 hover:text-red-600 transition-all duration-300 hover:scale-110">
+                  <button onClick={() => { logout(); logoutUser(); }} className="text-gray-600 hover:text-red-600 transition-all duration-300 hover:scale-110">
                     <LogOut className="h-6 w-6" />
                   </button>
                 </>

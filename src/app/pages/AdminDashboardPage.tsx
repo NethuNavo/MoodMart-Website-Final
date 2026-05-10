@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useMood, Product } from '../context/MoodContext';
 import { useUser } from '../context/UserContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Package, 
@@ -25,7 +25,8 @@ import {
   User as UserIcon,
   X,
   Menu,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Eye
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -35,11 +36,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import adminHeaderImage from "../../assets/admin-dashboard.png";
 
 export function AdminDashboardPage() {
+  const navigate = useNavigate();
+  
   const { 
     products, 
     addProduct, 
     updateProduct, 
     deleteProduct, 
+    loadProducts,
     orders, 
     updateOrderStatus, 
     users, 
@@ -47,7 +51,7 @@ export function AdminDashboardPage() {
     deleteUser 
   } = useMood();
 
-  const { isAdmin } = useUser();
+  const { isAdmin, user } = useUser();
 
   // redirect if not authorized
   if (!isAdmin) {
@@ -73,8 +77,8 @@ export function AdminDashboardPage() {
 
   // Admin Profile State
   const [adminProfile, setAdminProfile] = useState({
-    name: 'Admin User',
-    email: 'admin@moodmart.com',
+    name: user?.name || 'Admin User',
+    email: user?.email || 'admin@moodmart.com',
     image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'
   });
 
@@ -105,7 +109,7 @@ export function AdminDashboardPage() {
     setIsProductModalOpen(true);
   };
 
-  const handleProductSubmit = (e: React.FormEvent) => {
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productFormData.name || !productFormData.price || !productFormData.description) {
       toast.error('Please fill in all required fields');
@@ -117,19 +121,45 @@ export function AdminDashboardPage() {
       image: productFormData.image || 'https://images.unsplash.com/photo-1544367563-12123d8965cd?w=400&h=300&fit=crop',
     } as Product;
 
-    if (editingProduct) {
-      updateProduct(editingProduct.id, productData);
-      toast.success('Product updated successfully');
-    } else {
-      addProduct(productData);
-      toast.success('Product added successfully');
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, productData);
+        toast.success('Product updated successfully');
+      } else {
+        await addProduct(productData);
+        toast.success('Product added successfully');
+      }
+      setIsProductModalOpen(false);
+    } catch (err) {
+      console.error('Failed to save product', err);
+      toast.error('Unable to save product. Please try again.');
     }
-    setIsProductModalOpen(false);
   };
 
   const handleUpdateAdminProfile = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success('Profile updated successfully');
+  };
+
+  useEffect(() => {
+    loadProducts().catch((err) => {
+      console.error('Unable to load admin products', err);
+      toast.error('Unable to load products');
+    });
+  }, [loadProducts]);
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Delete this product?')) {
+      return;
+    }
+
+    try {
+      await deleteProduct(productId);
+      toast.success('Product deleted successfully');
+    } catch (err) {
+      console.error('Failed to delete product', err);
+      toast.error('Unable to delete product. Please try again.');
+    }
   };
 
   // --- Render Functions ---
@@ -366,9 +396,7 @@ export function AdminDashboardPage() {
                       <Button variant="ghost" size="icon" onClick={() => handleOpenProductModal(product)}>
                         <Edit className="w-4 h-4 text-blue-500" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        if(confirm('Delete this product?')) deleteProduct(product.id);
-                      }}>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product.id)}>
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
                     </div>
@@ -655,6 +683,23 @@ export function AdminDashboardPage() {
       {renderSidebar()}
       
       <main className="flex-1 min-w-0 overflow-auto">
+        {/* Admin Header with Switch Button */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold text-gray-900">Admin Dashboard</h1>
+            </div>
+            <Button 
+              onClick={() => navigate('/dashboard')}
+              variant="outline"
+              className="gap-2 flex items-center"
+            >
+              <Eye className="w-4 h-4" />
+              <span>Switch to User View</span>
+            </Button>
+          </div>
+        </div>
+
         <div className="md:hidden bg-white border-b border-gray-200">
           <div className="flex items-center justify-between px-4 py-3">
             <button

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMood } from '../context/MoodContext';
 import { useUser } from '../context/UserContext';
-const logo = new URL('../../assets/0b38a103a78cc9cd2458edca47c9ee2cf8746513.png', import.meta.url).href;
+import { authAPI, tokenManager } from '../utils/api';
 import { toast } from 'sonner';
+const logo = new URL('../../assets/0b38a103a78cc9cd2458edca47c9ee2cf8746513.png', import.meta.url).href;
 
 export function AuthPage() {
   const navigate = useNavigate();
@@ -20,31 +21,63 @@ export function AuthPage() {
   // Check if user came from cart/checkout
   const fromCheckout = location.state?.from === 'checkout';
   const fromCart = location.state?.from === 'cart';
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (activeTab === 'signup') {
-      registerUser({
-        name: formData.fullName,
-        email: formData.email,
-        password: formData.password,
+    setIsLoading(true);
+
+    try {
+      let response;
+      
+      if (activeTab === 'signup') {
+        response = await authAPI.register({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+        });
+        toast.success('Account created successfully!');
+      } else {
+        response = await authAPI.login({
+          email: formData.email,
+          password: formData.password,
+        });
+        toast.success('Welcome back!');
+      }
+
+      tokenManager.setToken(response.token);
+      loginUser({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role,
+        hasCompletedOrder: true,
       });
-      toast.success('Account created successfully!');
-    } else {
-      loginUser(formData.email, formData.password);
-      toast.success('Welcome back!');
-    }
-    
-    login();
-    
-    // Navigate based on where they came from
-    if (fromCheckout) {
-      navigate('/checkout');
-    } else if (fromCart) {
-      navigate('/cart');
-    } else {
-      navigate('/dashboard');
+      login({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role,
+        status: 'active',
+        joinDate: new Date().toISOString().split('T')[0],
+      });
+
+      const isAdminUser = response.user.role === 'admin' || response.user.email === 'admin@moodmart.com';
+
+      if (isAdminUser) {
+        navigate('/admin');
+      } else if (fromCheckout) {
+        navigate('/checkout');
+      } else if (fromCart) {
+        navigate('/cart');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 

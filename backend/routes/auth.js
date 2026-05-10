@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { authenticate } = require('../middleware/auth');
 
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
@@ -20,6 +21,15 @@ router.post('/register', async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
+  }
+});
+
+router.get('/profile', authenticate, async (req, res) => {
+  try {
+    res.json({ user: req.user });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
