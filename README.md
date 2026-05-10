@@ -1,4 +1,4 @@
-MoodMart – Mental Wellness Platform + E-commerce Website ✨🧠🛒🌿💙
+# MoodMart – Mental Wellness Platform + E-commerce Website ✨🧠🛒🌿💙
 
 Welcome to the MoodMart experience — a premium wellness commerce platform crafted for elegant digital retail, healing journeys, and modern self-care.
 
@@ -6,50 +6,56 @@ Welcome to the MoodMart experience — a premium wellness commerce platform craf
 
 MoodMart is a polished **MERN full-stack application** featuring:
 
-- 🛒 Luxe shopping experience with smooth product browsing & cart system  
-- 💳 Secure Stripe checkout for seamless payments  
-- 📧 Automated order confirmation email notifications  
-- 🧘 Mood tracking, breathing therapy & guided audio wellness  
-- 👥 Community pages for engagement & support  
-- 📊 Smart dashboard with analytics insights  
-- 😌 Face scan support using Face-API models  
+* 🛒 Luxe shopping experience with smooth product browsing & cart system
+* 💳 Secure Stripe checkout for seamless payments
+* 📧 Automated order confirmation email notifications
+* 🧘 Mood tracking, breathing therapy & guided audio wellness
+* 👥 Community pages for engagement & support
+* 📊 Smart dashboard with analytics insights
+* 😌 Face scan support using Face-API models
 
 ## 🧭 Project Structure
 
-- `backend/` — Express API, MongoDB, Stripe integration, Nodemailer email delivery
-- `client/` — React + Vite frontend with smooth UI flows
-- `public/` — static assets and face-api model resources
-- `src/` — main React app, pages, components, contexts
-- `docker-compose.yml` — optional containerized local setup
+* `backend/` — Express API, MongoDB, Stripe integration, Nodemailer email delivery
+* `public/` — static assets and face-api model resources
+* `src/` — React + Vite frontend source code, pages, components, and contexts
+* `docker-compose.yml` — optional containerized local setup
 
 ## ✨ Key Features
 
-- Secure authentication and cart checkout
-- Stripe payment flow with order success verification
-- Automatic order confirmation email after payment
-- User-friendly dashboard and wellness journey pages
-- Styled UI for mood and community engagement
-- Face scan utilities for enhanced user experiences
+* Secure authentication and cart checkout
+* Stripe payment flow with order success verification
+* Automatic order confirmation email after payment
+* User-friendly dashboard and wellness journey pages
+* Styled UI for mood and community engagement
+* Face scan utilities for enhanced user experiences
+* Audio therapy with guided wellness tracks
+* Emotion-based personalized wellness experience
 
 ## 🛠️ Prerequisites
 
-- Node.js 18+ / 20+
-- npm 10+
-- MongoDB available locally or remotely
-- Stripe account with test API keys
-- Gmail account with an App Password enabled for SMTP
+* Node.js 18+ / 20+
+* npm 10+
+* MongoDB available locally or remotely
+* Stripe account with test API keys
+* Gmail account with an App Password enabled for SMTP
 
 ## 🚀 Setup
 
-### 1. Backend
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Backend Setup
 
 ```bash
 cd backend
 npm install
-copy .env.example .env
 ```
 
-Edit `backend/.env` with your project settings:
+Create a `.env` file inside `backend/` and add:
 
 ```env
 PORT=5000
@@ -62,41 +68,54 @@ EMAIL_PASS=your_gmail_app_password
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-
-Start the backend:
+Start the backend server:
 
 ```bash
 npm run dev
 ```
 
-### 2. Frontend
+### 3. Frontend Setup
+
+Open another terminal and run:
 
 ```bash
-cd client
-npm install
 npm run dev
 ```
 
-Open the app at `http://localhost:5173`.
+Open the app at:
 
-If the backend runs elsewhere, set `VITE_API_URL` in `client/.env`.
+```bash
+http://localhost:5173
+```
+
+If the backend runs elsewhere, configure `VITE_API_URL` in your environment settings.
 
 ## 💳 Stripe Payment Flow
 
-- Checkout creates a Stripe session through `/api/payments/create-checkout-session`
-- Successful payment redirects to `/order-success?session_id={CHECKOUT_SESSION_ID}`
-- The app verifies the paid session and sends the confirmation email
+* Checkout creates a Stripe session through `/api/payments/create-checkout-session`
+* Successful payment redirects to `/order-success?session_id={CHECKOUT_SESSION_ID}`
+* The app verifies the paid session and sends the confirmation email
 
-### Test card details
+### Test Card Details
 
-- Card number: `4242 4242 4242 4242`
-- Expiry: any future date
-- CVC: any 3 digits
+* Card number: `4242 4242 4242 4242`
+* Expiry: any future date
+* CVC: any 3 digits
 
 ## 📧 Email Setup
 
 Nodemailer uses Gmail SMTP. Make sure you:
 
-- enable Google Two-Factor Authentication
-- generate a Gmail App Password
-- add the full 16-character code to `EMAIL_PASS`
+* Enable Google Two-Factor Authentication
+* Generate a Gmail App Password
+* Add the full 16-character App Password to `EMAIL_PASS`
+
+## 🌐 Deployment
+
+Frontend deployed with Vercel:
+
+
+
+## 👩‍💻 Author
+
+Developed by **Nethmini Jayamani**
