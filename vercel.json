@@ -5,8 +5,10 @@
       "framework": "vite"
     },
     "backend": {
-      "entrypoint": "backend",
+      "entrypoint": "backend/server.js",
       "routePrefix": "/_/backend"
     }
-  }
+  },
+  "buildCommand": "vite build",
+  "devCommand": "vite"
 }
