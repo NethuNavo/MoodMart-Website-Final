@@ -30,11 +30,25 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error', details: err.message || 'Unknown error' });
 });
 
-connectDB().catch((err) => {
-  console.error('Failed to connect to MongoDB:', err.message || err);
+async function startServer() {
+  try {
+    await connectDB();
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err.message || err);
+    process.exit(1);
+  }
+}
+
+startServer();
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
 });
