@@ -4,10 +4,10 @@ import { Camera, Scan, AlertCircle, Smile, Frown, Meh, AlertTriangle, CloudRain,
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { Alert, AlertDescription } from '../components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import { useUser } from '../context/UserContext';
 import { useMood } from '../context/MoodContext';
+import { moodAPI } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import * as faceapi from 'face-api.js';
@@ -15,7 +15,7 @@ import facialRecognitionImage from "../../assets/facial-recognition.png";
 import calmCoverImage from "../../assets/calm.jpg";
 
 export function FaceScanPage() {
-  const { isGuest, isRegistered, guestFaceScanUsed, markGuestFaceScanUsed } = useUser();
+  const { isGuest, guestFaceScanUsed, markGuestFaceScanUsed } = useUser();
   const navigate = useNavigate();
   const { addToCart, products } = useMood();
 
@@ -69,8 +69,8 @@ export function FaceScanPage() {
 
   const [dominantEmotion, setDominantEmotion] = useState(emotions[0]);
   const [currentMood, setCurrentMood] = useState(emotions[0]);
-  const [selectedManualMood, setSelectedManualMood] = useState('Neutral');
-  const [moodNote, setMoodNote] = useState('');
+  const [isSavingMood, setIsSavingMood] = useState(false);
+  const [savedMoodMessage, setSavedMoodMessage] = useState<string | null>(null);
 
   const moodAudioTracks: Record<string, { title: string; description: string; duration: string; src: string; image: string }> = {
     Neutral: {
@@ -252,33 +252,46 @@ export function FaceScanPage() {
     });
   };
 
-  const moodOptions = [
-    { name: 'Neutral', icon: <Meh className="w-5 h-5" />, color: 'border-purple-300 bg-purple-50 text-purple-800', bg: 'bg-purple-100 text-purple-800' },
-    { name: 'Happy', icon: <Smile className="w-5 h-5" />, color: 'border-amber-300 bg-amber-50 text-amber-800', bg: 'bg-amber-100 text-amber-800' },
-    { name: 'Sad', icon: <CloudRain className="w-5 h-5" />, color: 'border-blue-300 bg-blue-50 text-blue-800', bg: 'bg-blue-100 text-blue-800' },
-    { name: 'Angry', icon: <Frown className="w-5 h-5" />, color: 'border-red-300 bg-red-50 text-red-800', bg: 'bg-red-100 text-red-800' },
-    { name: 'Fearful', icon: <AlertTriangle className="w-5 h-5" />, color: 'border-violet-300 bg-violet-50 text-violet-800', bg: 'bg-violet-100 text-violet-800' },
-    { name: 'Disgusted', icon: <ThumbsDown className="w-5 h-5" />, color: 'border-emerald-300 bg-emerald-50 text-emerald-800', bg: 'bg-emerald-100 text-emerald-800' },
-    { name: 'Surprised', icon: <Zap className="w-5 h-5" />, color: 'border-pink-300 bg-pink-50 text-pink-800', bg: 'bg-pink-100 text-pink-800' },
-  ];
-
-  const updateCurrentMood = (moodName: string) => {
-    const newMood = emotions.find((emotion) => emotion.name === moodName) || emotions[0];
-    setCurrentMood(newMood);
-    setDominantEmotion(newMood);
-    setEmotions((prev) => prev.map((emotion) => ({
-      ...emotion,
-      percentage: emotion.name === moodName ? 100 : 0,
-    })));
-  };
-
-  const handleSaveManualMood = () => {
-    updateCurrentMood(selectedManualMood);
-    setMoodNote('');
-    toast.success(`Logged mood as ${selectedManualMood}`);
-  };
-
   const currentAudioTrack = moodAudioTracks[currentMood.name] || moodAudioTracks.Neutral;
+
+  const calculateMoodIntensity = () => {
+    const intensity = Math.max(1, Math.min(5, Math.round(dominantEmotion.percentage / 20) || 3));
+    return intensity;
+  };
+
+  const handleSaveDetectedMood = async () => {
+    if (!showResult) {
+      toast.error('Please scan your face first before saving your mood.');
+      return;
+    }
+
+    if (isGuest) {
+      setShowAuthPrompt(true);
+      return;
+    }
+
+    setIsSavingMood(true);
+    setSavedMoodMessage(null);
+
+    try {
+      const payload = {
+        date: new Date().toISOString().split('T')[0],
+        mood: currentMood.name,
+        intensity: calculateMoodIntensity(),
+        stressLevel: 0,
+        notes: 'Detected by face scan',
+      };
+
+      await moodAPI.createMoodEntry(payload);
+      setSavedMoodMessage('Your detected mood has been saved to the database.');
+      toast.success('Mood saved successfully.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to save mood.';
+      toast.error(message);
+    } finally {
+      setIsSavingMood(false);
+    }
+  };
   
   // Get recommended products for current mood
   const recommendedProductIds = moodProductIds[currentMood.name] || moodProductIds.Neutral;
@@ -565,9 +578,20 @@ export function FaceScanPage() {
               <div className="mt-6 rounded-3xl bg-white p-4 shadow-sm shadow-gray-200">
                 <audio controls className="w-full rounded-3xl" src={currentAudioTrack.src} />
               </div>
-              <div className="mt-6 rounded-3xl border border-gray-200 bg-slate-50 p-6">
-                <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-semibold">Breathing Recommendation</p>
-                <h4 className="mt-4 text-lg font-semibold text-slate-900">{currentBreathingTip.title}</h4>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate('/breathing')}
+                onKeyDown={(event) => event.key === 'Enter' && navigate('/breathing')}
+                className="mt-6 cursor-pointer rounded-3xl bg-gradient-to-br from-[#eef2ff] via-[#f8fbff] to-white border border-[#d6e4ff] p-6 shadow-sm shadow-slate-200/40 ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Breathing Recommendation</p>
+                    <h4 className="mt-4 text-lg font-semibold text-slate-900">{currentBreathingTip.title}</h4>
+                  </div>
+                  <span className="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-700">Go</span>
+                </div>
                 <p className="mt-3 text-sm text-slate-600">{currentBreathingTip.details}</p>
               </div>
             </div>
@@ -576,48 +600,38 @@ export function FaceScanPage() {
           <Card className="bg-white p-8 rounded-3xl shadow-xl shadow-purple-50 border border-gray-50">
             <div className="mb-6">
               <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-semibold">Your Mood Log</p>
-              <h3 className="text-2xl font-bold text-gray-900">Manual Mood Entry</h3>
+              <h3 className="text-2xl font-bold text-gray-900">Save Detected Mood</h3>
             </div>
 
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 xl:grid-cols-4">
-                {moodOptions.map((option) => (
-                  <button
-                    key={option.name}
-                    type="button"
-                    onClick={() => setSelectedManualMood(option.name)}
-                    className={`rounded-3xl border p-6 text-center transition flex flex-col items-center justify-center gap-3 min-h-[160px] ${
-                      selectedManualMood === option.name
-                        ? `${option.color} shadow-lg`
-                        : `border-gray-200 bg-white text-gray-700 hover:border-purple-400 hover:bg-purple-50`
-                    }`}
-                  >
-                    <span className={`rounded-full p-3 ${option.bg}`}>
-                      {option.icon}
-                    </span>
-                    <span className="text-sm font-semibold">{option.name}</span>
-                    <p className="text-xs text-gray-500">Tap to select</p>
-                  </button>
-                ))}
-              </div>
+              <p className="text-sm text-gray-500">After scanning, save the detected mood to store it in your profile.</p>
 
-              <div>
-                <textarea
-                  value={moodNote}
-                  onChange={(event) => setMoodNote(event.target.value)}
-                  className="w-full rounded-3xl border border-gray-200 p-4 text-sm text-gray-700 focus:border-purple-500 focus:ring-purple-100"
-                  rows={4}
-                  placeholder="How are you feeling?"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <Button onClick={handleSaveManualMood} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-3xl">
-                  Save Mood
+              <div className="flex flex-col gap-4">
+                <Button
+                  onClick={handleSaveDetectedMood}
+                  disabled={!showResult || isSavingMood}
+                  className={`px-8 py-5 text-lg font-semibold rounded-xl shadow-lg transition-all active:scale-95 ${
+                    !showResult || isSavingMood
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                      : 'bg-[#a855f7] hover:bg-[#9333ea] text-white shadow-purple-200'
+                  }`}
+                >
+                  {isSavingMood ? 'Saving...' : 'Save Mood'}
                 </Button>
-                <div>
-                  <p className="text-sm text-gray-500">Current mood will update product and audio recommendations.</p>
-                </div>
+
+                {savedMoodMessage && (
+                  <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+                    {savedMoodMessage}
+                  </div>
+                )}
+
+                {!showResult && (
+                  <p className="text-sm text-gray-500">Scan your face to detect your mood before saving.</p>
+                )}
+
+                {isGuest && showResult && (
+                  <p className="text-sm text-purple-700">Guests must log in to save mood history. Tap Save Mood to continue.</p>
+                )}
               </div>
             </div>
           </Card>

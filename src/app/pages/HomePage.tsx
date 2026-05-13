@@ -6,6 +6,7 @@ import { Card } from '../components/ui/card';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useNotification } from '../context/NotificationContext';
 import { useMood } from '../context/MoodContext';
+import { useUser } from '../context/UserContext';
 const heroImage = new URL('../../assets/e8741628041c196123a6d53ca1d67a561fc66035.png', import.meta.url).href;
 const heroBannerImage = new URL('../../assets/683421661700aa65fdf714555327e8a9830b3ffb.png', import.meta.url).href;
 const wellnessDesign = new URL('../../assets/home motivate.jpg', import.meta.url).href;
@@ -21,22 +22,24 @@ export function HomePage() {
   const navigate = useNavigate();
   const { showMoodBasedNotification } = useNotification();
   const { moodEntries } = useMood();
+  const { isRegistered } = useUser();
 
   // Show motivational notification on page load
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Get the latest mood entry
       const latestMood = moodEntries[moodEntries.length - 1];
-      if (latestMood) {
+
+      if (isRegistered && latestMood) {
+        // Logged in user: use mood-based notifications
         showMoodBasedNotification(latestMood.mood, latestMood.stressLevel);
       } else {
-        // Show default motivational message
+        // Guest or no mood data: show normal motivational notifications
         showMoodBasedNotification('default');
       }
     }, 2000); // Show after 2 seconds
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isRegistered, moodEntries, showMoodBasedNotification]);
 
   const quickAccess = [
     {

@@ -27,7 +27,7 @@ function App() {
       <UserProvider>
         <MoodProvider>
           <NotificationProvider>
-            <div className="min-h-screen flex flex-col bg-white">
+            <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
               <Header />
               <main className="flex-1">
                 <Routes>

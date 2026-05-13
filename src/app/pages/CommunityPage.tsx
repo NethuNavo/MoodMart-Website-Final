@@ -67,7 +67,7 @@ export function CommunityPage() {
   useEffect(() => {
     if (!isRegistered) {
       toast.error('Please log in to access the Community Forum');
-      navigate('/auth');
+      navigate('/auth', { state: { from: 'community' } });
     }
   }, [isRegistered, navigate]);
 

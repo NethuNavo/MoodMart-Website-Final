@@ -5,7 +5,7 @@ import logo from '../../assets/f4c24801ede734faa0ef43426098838b5fa49112.png';
 
 
 export function Footer() {
-  const { isAdmin } = useUser();
+  const { isAdmin, isRegistered } = useUser();
   return (
     <footer className="bg-gradient-to-r from-[#5B5A7E] via-[#6B5B95] to-[#5B5A7E] text-white mt-auto relative overflow-hidden">
       {/* Decorative elements */}
@@ -49,7 +49,9 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm text-white/70">
               <li><Link to="/audio" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Guided Meditations</Link></li>
               <li><Link to="/community" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Community Forum</Link></li>
-              <li><Link to="/mood" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Mood Tracker</Link></li>
+              {isRegistered && (
+                <li><Link to="/mood" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Mood Tracker</Link></li>
+              )}
               <li><Link to="/breathing" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Breathing Exercises</Link></li>
               <li><Link to="/shop" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Shop</Link></li>
             </ul>

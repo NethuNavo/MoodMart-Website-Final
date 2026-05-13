@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { productAPI } from '../utils/api';
 
 export interface MoodEntry {
@@ -32,6 +32,15 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+export type ThemeKey =
+  | 'neutral'
+  | 'happy'
+  | 'sad'
+  | 'angry'
+  | 'fearful'
+  | 'disgusted'
+  | 'surprised';
+
 export interface Order {
   id: string;
   customerName: string;
@@ -63,8 +72,12 @@ interface MoodContextType {
   currentUser: User | null;
   login: (user: User) => User | null;
   logout: () => void;
-  currentTheme: string;
-  setCurrentTheme: (theme: string) => void;
+  currentTheme: ThemeKey;
+  setCurrentTheme: (theme: ThemeKey) => void;
+  currentMoodEntry?: MoodEntry;
+  recommendedProductsByMood: Product[];
+  autoThemeEnabled: boolean;
+  setAutoThemeEnabled: (enabled: boolean) => void;
   products: Product[];
   isProductsLoading: boolean;
   loadProducts: () => Promise<Product[]>;
@@ -96,8 +109,12 @@ export function useMood() {
       currentUser: null,
       login: () => null,
       logout: () => {},
-      currentTheme: 'light',
+      currentTheme: 'neutral',
       setCurrentTheme: () => {},
+      currentMoodEntry: undefined,
+      recommendedProductsByMood: [],
+      autoThemeEnabled: true,
+      setAutoThemeEnabled: () => {},
       products: [],
       isProductsLoading: false,
       loadProducts: async () => [],
@@ -133,7 +150,29 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentTheme, setCurrentTheme] = useState('default');
+  const [currentTheme, setCurrentTheme] = useState<ThemeKey>(() => {
+    if (typeof window === 'undefined') return 'neutral';
+    const savedTheme = window.localStorage.getItem('moodmart-theme') as ThemeKey | null;
+    return savedTheme ?? 'neutral';
+  });
+
+  const [autoThemeEnabled, setAutoThemeEnabled] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const saved = window.localStorage.getItem('moodmart-auto-theme');
+    return saved !== null ? JSON.parse(saved) : true; // Default to enabled
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const themeClasses: ThemeKey[] = ['neutral', 'happy', 'sad', 'angry', 'fearful', 'disgusted', 'surprised'];
+    themeClasses.forEach((themeClass) => root.classList.remove(`theme-${themeClass}`));
+    root.classList.add(`theme-${currentTheme}`);
+    window.localStorage.setItem('moodmart-theme', currentTheme);
+  }, [currentTheme]);
+
+  useEffect(() => {
+    window.localStorage.setItem('moodmart-auto-theme', JSON.stringify(autoThemeEnabled));
+  }, [autoThemeEnabled]);
 
   // Initial products
   const [products, setProducts] = useState<Product[]>([
@@ -286,6 +325,123 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
     return 'Night';
   };
 
+  // Map mood types to theme keys for automatic theme switching
+  const getThemeForMood = (mood: MoodEntry['mood']): ThemeKey => {
+    const moodThemeMap: Record<string, ThemeKey> = {
+      // Happy themes
+      'happy': 'happy',
+      'calm': 'happy',
+      'relaxed': 'happy',
+      'content': 'happy',
+      'energetic': 'happy',
+      'motivated': 'happy',
+      'grateful': 'happy',
+      'okay': 'happy',
+      'normal': 'happy',
+      'focused': 'happy',
+      'rested': 'happy',
+
+      // Sad themes
+      'sad': 'sad',
+      'lonely': 'sad',
+      'depressed': 'sad',
+      'mentally-drained': 'sad',
+      'overthinking': 'sad',
+      'confused': 'sad',
+
+      // Angry themes
+      'angry': 'angry',
+      'frustrated': 'angry',
+      'overwhelmed': 'angry',
+
+      // Fearful themes
+      'anxious': 'fearful',
+      'stressed': 'fearful',
+      'insomnia': 'fearful',
+
+      // Disgusted themes
+      'bored': 'disgusted',
+      'tired': 'disgusted',
+      'exhausted': 'disgusted',
+      'sleepy': 'disgusted',
+
+      // Surprised themes (for intense emotions)
+      'surprised': 'surprised'
+    };
+
+    return moodThemeMap[mood] || 'neutral';
+  };
+
+  const currentMoodEntry = useMemo<MoodEntry | undefined>(() => {
+    if (moodEntries.length === 0) return undefined;
+    return moodEntries[moodEntries.length - 1];
+  }, [moodEntries]);
+
+  useEffect(() => {
+    if (!autoThemeEnabled || !currentMoodEntry) return;
+    const themeForMood = getThemeForMood(currentMoodEntry.mood);
+    if (themeForMood !== currentTheme) {
+      setCurrentTheme(themeForMood);
+    }
+  }, [autoThemeEnabled, currentMoodEntry, currentTheme]);
+
+  const recommendedProductsByMood = useMemo<Product[]>(() => {
+    const mood = currentMoodEntry?.mood;
+    const moodTheme = mood ? getThemeForMood(mood) : 'neutral';
+
+    const moodProductMap: Record<ThemeKey, { categories: Product['category'][]; tags: string[]; names: string[] }> = {
+      neutral: {
+        categories: ['journal', 'book'],
+        tags: ['Recommended', 'Popular', 'Bestseller'],
+        names: [],
+      },
+      happy: {
+        categories: ['journal', 'book', 'supplement'],
+        tags: ['Recommended', 'Popular', 'Bestseller'],
+        names: ['Gratitude Journal', 'Mindfulness Journal', 'The Power of Now', 'Aromatherapy Diffuser'],
+      },
+      sad: {
+        categories: ['book', 'journal', 'essential-oil', 'supplement'],
+        tags: ['Recommended'],
+        names: ['Lavender Essential Oil', 'The Anxiety Toolkit', 'Gratitude Journal', 'Aromatherapy Diffuser', 'Meditation Cushion'],
+      },
+      angry: {
+        categories: ['essential-oil', 'supplement', 'journal'],
+        tags: ['Popular', 'Recommended'],
+        names: ['Eucalyptus Essential Oil', 'Aromatherapy Diffuser', 'Meditation Cushion'],
+      },
+      fearful: {
+        categories: ['book', 'journal', 'essential-oil'],
+        tags: ['Recommended', 'Bestseller'],
+        names: ['Lavender Essential Oil', 'The Anxiety Toolkit', 'Gratitude Journal', 'Aromatherapy Diffuser'],
+      },
+      disgusted: {
+        categories: ['journal', 'essential-oil', 'supplement'],
+        tags: ['Featured', 'Recommended'],
+        names: ['Gratitude Journal', 'Aromatherapy Diffuser', 'Lavender Essential Oil', 'Meditation Cushion'],
+      },
+      surprised: {
+        categories: ['book', 'journal', 'supplement'],
+        tags: ['Bestseller', 'Featured'],
+        names: ['The Power of Now', 'Gratitude Journal', 'Meditation Cushion'],
+      },
+    };
+
+    const criteria = moodProductMap[moodTheme];
+    const matches = products.filter((product) => {
+      if (criteria.names.includes(product.name)) return true;
+      if (criteria.tags.some((tag) => product.tag?.includes(tag))) return true;
+      if (criteria.categories.includes(product.category)) return true;
+      return false;
+    });
+
+    if (matches.length > 0) {
+      return matches.slice(0, 4);
+    }
+
+    return products.filter((product) => product.tag && ['Recommended', 'Bestseller', 'Popular', 'Featured'].includes(product.tag)).slice(0, 4);
+  }, [products, currentMoodEntry]);
+
   const addMoodEntry = (entry: Omit<MoodEntry, 'id' | 'segment'>) => {
     const today = new Date().toISOString().split('T')[0];
     const segment = getTimeSegment();
@@ -308,11 +464,21 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
       segment,
     };
     setMoodEntries([...moodEntries, newEntry]);
+
+    // Automatically change theme based on mood if auto-theme is enabled
+    if (autoThemeEnabled) {
+      const themeForMood = getThemeForMood(entry.mood);
+      setCurrentTheme(themeForMood);
+    }
+
     return {
       success: true,
-      message: `Mood logged for ${segment.toLowerCase()} successfully.`,
+      message: autoThemeEnabled
+        ? `Mood logged for ${segment.toLowerCase()} successfully. Theme updated to match your mood!`
+        : `Mood logged for ${segment.toLowerCase()} successfully.`,
     };
   };
+
 
   const loadProducts = useCallback(async (): Promise<Product[]> => {
     setIsProductsLoading(true);
@@ -436,6 +602,10 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
         logout,
         currentTheme,
         setCurrentTheme,
+        currentMoodEntry,
+        recommendedProductsByMood,
+        autoThemeEnabled,
+        setAutoThemeEnabled,
         products,
         isProductsLoading,
         loadProducts,

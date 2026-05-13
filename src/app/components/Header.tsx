@@ -10,7 +10,7 @@ const logo = new URL('../../assets/0b38a103a78cc9cd2458edca47c9ee2cf8746513.png'
 export function Header() {
   const location = useLocation();
   const { cart, isAuthenticated, logout } = useMood();
-  const { isAdmin, logoutUser } = useUser();
+  const { isAdmin, isRegistered, logoutUser } = useUser();
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [isMiniCartOpen, setIsMiniCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -32,7 +32,7 @@ export function Header() {
 
   const navLinks = [
     { to: '/', label: 'Home' },
-    { to: '/mood', label: 'Mood' },
+    ...(isRegistered ? [{ to: '/mood', label: 'Mood' }] : []),
     { to: '/face-scan', label: 'Face Scan' },
     { to: '/audio', label: 'Audio' },
     { to: '/breathing', label: 'Breathing' },

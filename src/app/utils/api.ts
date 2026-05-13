@@ -143,6 +143,23 @@ export const productAPI = {
   },
 };
 
+export interface MoodEntryPayload {
+  date: string;
+  mood: string;
+  intensity: number;
+  stressLevel?: number;
+  notes?: string;
+}
+
+export const moodAPI = {
+  async createMoodEntry(data: MoodEntryPayload) {
+    return apiCall<any>('/api/mood-entries', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+};
+
 // Helper to store and retrieve authentication token
 export const tokenManager = {
   setToken(token: string) {

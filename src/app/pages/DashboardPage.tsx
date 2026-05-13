@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMood } from '../context/MoodContext';
 import { useUser } from '../context/UserContext';
-import { TrendingUp, Heart, Smile, Calendar, Music, Sparkles, Activity, BookOpen, Moon, Play, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, Heart, Smile, Calendar, Music, Sparkles, Activity, BookOpen, Moon, Play, CheckCircle2, RefreshCcw, Edit3, Trash2, ArrowRight } from 'lucide-react';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { ResponsiveContainer, XAxis, Tooltip, BarChart, Bar } from 'recharts';
@@ -24,9 +24,6 @@ export function DashboardPage() {
         break;
       case 'Play Audio':
         navigate('/audio');
-        break;
-      case 'Write Journal':
-        navigate('/mood');
         break;
       case 'Face Scan':
         navigate('/face-scan');
@@ -53,7 +50,6 @@ export function DashboardPage() {
     { title: 'Log My Mood', subtitle: 'Track your feelings', emoji: '😊', color: 'from-purple-200 to-purple-300' },
     { title: 'Start Breathing', subtitle: 'Calm your mind', emoji: '🌀', color: 'from-cyan-200 to-cyan-300' },
     { title: 'Play Audio', subtitle: 'Relax & focus', emoji: '🎵', color: 'from-pink-200 to-pink-300' },
-    { title: 'Write Journal', subtitle: 'Express yourself', emoji: '✍️', color: 'from-violet-200 to-violet-300' },
     { title: 'Face Scan', subtitle: 'Check your mood', emoji: '📷', color: 'from-emerald-200 to-emerald-300' },
     { title: 'Community', subtitle: 'Connect & support', emoji: '👥', color: 'from-slate-200 to-slate-300' },
   ];
@@ -107,6 +103,252 @@ export function DashboardPage() {
     { title: 'Community Activity', value: '132', subtitle: 'People meditated today', emoji: '👥', bg: 'bg-sky-100 text-sky-700' },
     { title: 'Daily Quote', value: '“Keep going!”', subtitle: 'Small wins matter', emoji: '💜', bg: 'bg-pink-100 text-pink-700' },
   ];
+
+  interface Challenge {
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    icon: string;
+    color: string;
+    gradient: string;
+  }
+
+  interface GratitudeNote {
+    id: string;
+    text: string;
+    date: string;
+  }
+
+  const challengeQuotes = [
+    'Small steps create lasting calm.',
+    'Today’s choice is your wellness boost.',
+    'You’re building a kinder daily rhythm.',
+    'A gentle moment for yourself matters.',
+    'Celebrate every small self-care win.',
+  ];
+
+  const challengeCategories = ['Relaxation', 'Digital Detox', 'Healthy Habits', 'Self-Love', 'Social Wellness', 'Mindfulness'];
+
+  const challenges: Challenge[] = [
+    {
+      id: 'walk-outside',
+      title: 'Take a 10-minute walk outside',
+      description: 'Move your body and breathe in fresh air for a mood-boosting reset.',
+      category: 'Relaxation',
+      icon: '🚶‍♀️',
+      color: 'text-emerald-700',
+      gradient: 'from-emerald-100 to-emerald-200',
+    },
+    {
+      id: 'water-then-phone',
+      title: 'Drink water before checking your phone',
+      description: 'Hydrate first and start the day with a calmer, clearer mindset.',
+      category: 'Healthy Habits',
+      icon: '💧',
+      color: 'text-cyan-700',
+      gradient: 'from-cyan-100 to-cyan-200',
+    },
+    {
+      id: 'social-media-break',
+      title: 'Stay away from social media for 30 minutes',
+      description: 'Give your mind a break and reconnect with the present moment.',
+      category: 'Digital Detox',
+      icon: '📵',
+      color: 'text-violet-700',
+      gradient: 'from-violet-100 to-violet-200',
+    },
+    {
+      id: 'positive-thoughts',
+      title: 'Write 3 positive thoughts about yourself',
+      description: 'Reflect on your strengths and let self-kindness take root.',
+      category: 'Self-Love',
+      icon: '📝',
+      color: 'text-pink-700',
+      gradient: 'from-pink-100 to-pink-200',
+    },
+    {
+      id: 'calming-music',
+      title: 'Listen to calming music for 5 minutes',
+      description: 'Set a gentle soundtrack for peace and let your tension soften.',
+      category: 'Mindfulness',
+      icon: '🎧',
+      color: 'text-slate-700',
+      gradient: 'from-slate-100 to-slate-200',
+    },
+    {
+      id: 'share-a-smile',
+      title: 'Send a kind message to someone today',
+      description: 'Connect with another person and spread warmth through a small note.',
+      category: 'Social Wellness',
+      icon: '💌',
+      color: 'text-rose-700',
+      gradient: 'from-rose-100 to-rose-200',
+    },
+  ];
+
+  const gratitudePrompts = [
+    'Today, I’m grateful for…',
+    'Something that made me smile today was…',
+    'A person I appreciate today is…',
+    'I feel grateful for this little moment of peace…',
+    'I’m thankful for the comfort in my day because…',
+  ];
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+
+  const hashString = (value: string) => {
+    let hash = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      hash = (hash << 5) - hash + value.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  };
+
+  const getDailyIndex = () => hashString(todayKey) % challenges.length;
+
+  const [activeChallengeIndex, setActiveChallengeIndex] = useState<number>(getDailyIndex());
+  const [challengeCompletedDates, setChallengeCompletedDates] = useState<string[]>([]);
+  const [challengeQuote, setChallengeQuote] = useState<string>('Complete your first challenge today.');
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const [gratitudeInput, setGratitudeInput] = useState('');
+  const [gratitudeNotes, setGratitudeNotes] = useState<GratitudeNote[]>([]);
+  const [viewAllGratitudes, setViewAllGratitudes] = useState(false);
+  const [editingGratitudeId, setEditingGratitudeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedChallenges = localStorage.getItem('moodmart_challenge_history');
+    if (storedChallenges) {
+      try {
+        const parsed = JSON.parse(storedChallenges);
+        if (Array.isArray(parsed.completedDates)) {
+          setChallengeCompletedDates(parsed.completedDates);
+        }
+        if (typeof parsed.lastQuote === 'string') {
+          setChallengeQuote(parsed.lastQuote);
+        }
+      } catch {
+        // ignore invalid storage
+      }
+    }
+
+    const storedGratitudes = localStorage.getItem('moodmart_gratitude_notes');
+    if (storedGratitudes) {
+      try {
+        const parsed = JSON.parse(storedGratitudes);
+        if (Array.isArray(parsed)) {
+          setGratitudeNotes(parsed);
+        }
+      } catch {
+        // ignore invalid storage
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('moodmart_challenge_history', JSON.stringify({ completedDates: challengeCompletedDates, lastQuote: challengeQuote }));
+  }, [challengeCompletedDates, challengeQuote]);
+
+  useEffect(() => {
+    localStorage.setItem('moodmart_gratitude_notes', JSON.stringify(gratitudeNotes));
+  }, [gratitudeNotes]);
+
+  const activeChallenge = challenges[activeChallengeIndex];
+
+  const challengeCompletedSet = new Set(challengeCompletedDates);
+  const isChallengeCompletedToday = challengeCompletedSet.has(todayKey);
+
+  const computeStreak = () => {
+    let count = 0;
+    const today = new Date();
+    for (let offset = 0; offset < 7; offset += 1) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - offset);
+      const dateKey = date.toISOString().slice(0, 10);
+      if (challengeCompletedSet.has(dateKey)) {
+        count += 1;
+      } else {
+        break;
+      }
+    }
+    return count;
+  };
+
+  const streakCount = computeStreak();
+  const weeklyProgress = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - index));
+    const dateKey = date.toISOString().slice(0, 10);
+    return {
+      day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+      completed: challengeCompletedSet.has(dateKey),
+    };
+  });
+
+  const handleRefreshChallenge = () => {
+    let nextIndex = activeChallengeIndex;
+    while (nextIndex === activeChallengeIndex) {
+      nextIndex = Math.floor(Math.random() * challenges.length);
+    }
+    setActiveChallengeIndex(nextIndex);
+  };
+
+  const handleCompleteChallenge = () => {
+    if (isChallengeCompletedToday) {
+      return;
+    }
+    const quote = challengeQuotes[Math.floor(Math.random() * challengeQuotes.length)];
+    setChallengeQuote(quote);
+    setChallengeCompletedDates((prev) => [...new Set([...prev, todayKey])]);
+    setShowConfetti(true);
+    window.setTimeout(() => setShowConfetti(false), 2200);
+  };
+
+  const dailyPromptIndex = hashString(todayKey) % gratitudePrompts.length;
+  const dailyPrompt = gratitudePrompts[dailyPromptIndex];
+
+  const handleSaveGratitude = () => {
+    if (!gratitudeInput.trim()) {
+      return;
+    }
+
+    const note = {
+      id: editingGratitudeId || Date.now().toString(),
+      text: gratitudeInput.trim(),
+      date: new Date().toLocaleString('en-US', { hour12: true }),
+    };
+
+    if (editingGratitudeId) {
+      setGratitudeNotes((notes) => notes.map((item) => (item.id === editingGratitudeId ? note : item)));
+      setEditingGratitudeId(null);
+    } else {
+      setGratitudeNotes((notes) => [note, ...notes]);
+    }
+
+    setGratitudeInput('');
+  };
+
+  const handleEditGratitude = (id: string) => {
+    const note = gratitudeNotes.find((item) => item.id === id);
+    if (note) {
+      setGratitudeInput(note.text);
+      setEditingGratitudeId(id);
+    }
+  };
+
+  const handleDeleteGratitude = (id: string) => {
+    setGratitudeNotes((notes) => notes.filter((item) => item.id !== id));
+    if (editingGratitudeId === id) {
+      setEditingGratitudeId(null);
+      setGratitudeInput('');
+    }
+  };
+
+  const gratitudeCount = gratitudeNotes.length;
+  const showGratitudeNotes = viewAllGratitudes && gratitudeCount > 0;
+  const visibleGratitudeNotes = showGratitudeNotes ? gratitudeNotes : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -177,152 +419,153 @@ export function DashboardPage() {
             ))}
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid md:grid-cols-4 gap-6">
-            <Card className="p-6 bg-[#0F6B58] text-white">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-white/10 text-white">
-                    <Calendar className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm">Mood Entries</p>
-                    <p className="text-2xl font-semibold">{moodEntries.length}</p>
-                  </div>
+          <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+            <Card className="relative overflow-hidden rounded-[32px] border border-white/70 bg-gradient-to-br from-[#f4f5ff] via-[#fcf7ff] to-[#effcf7] p-6 shadow-[0_28px_90px_rgba(124,58,237,0.15)]">
+              {showConfetti && (
+                <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+                  {Array.from({ length: 12 }).map((_, index) => (
+                    <span
+                      key={index}
+                      className="absolute h-2 w-2 rounded-full opacity-90 animate-challenge-confetti"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 50}%`,
+                        animationDelay: `${Math.random() * 0.6}s`,
+                        backgroundColor: ['#A78BFA', '#F9A8D4', '#6EE7B7', '#93C5FD'][index % 4],
+                      }}
+                    />
+                  ))}
                 </div>
-                <div className="text-sm text-white/90 mt-1">+7 this week</div>
-              </div>
-            </Card>
-            <Card className="p-6 bg-[#0F6B58] text-white">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-white/10 text-white">
-                    <TrendingUp className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm">Avg Stress</p>
-                    <p className="text-2xl font-semibold">{averageStress}/10</p>
-                  </div>
-                </div>
-                <div className="text-sm text-white/90 mt-1">Improving ↓</div>
-              </div>
-            </Card>
-            <Card className="p-6 bg-[#0F6B58] text-white">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-white/10 text-white">
-                    <Heart className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm">Streak</p>
-                    <p className="text-2xl font-semibold">7 days</p>
-                  </div>
-                </div>
-                <div className="text-sm text-white/90 mt-1">Keep going!</div>
-              </div>
-            </Card>
-            <Card className="p-6 bg-[#0F6B58] text-white">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-white/10 text-white">
-                    <Smile className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm">Mood Score</p>
-                    <p className="text-2xl font-semibold">68%</p>
-                  </div>
-                </div>
-                <div className="text-sm text-white/90 mt-1">Strong pace</div>
-              </div>
-            </Card>
-          </div>
+              )}
 
-          {/* New Wellness Sections */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Today's Plan</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">Your personalized plan for today</h3>
+              <div className="relative z-20 space-y-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Random Self-Care Challenge</p>
+                    <h3 className="mt-2 text-2xl font-semibold text-slate-950">Daily wellness mission</h3>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleRefreshChallenge}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                    >
+                      <RefreshCcw className="h-4 w-4" />
+                      Refresh Challenge
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCompleteChallenge}
+                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${isChallengeCompletedToday ? 'bg-emerald-200 text-emerald-900' : 'bg-violet-600 text-white hover:bg-violet-700'}`}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      {isChallengeCompletedToday ? 'Completed' : 'Mark as Completed'}
+                    </button>
+                  </div>
                 </div>
-                <Calendar className="h-6 w-6 text-slate-600" />
-              </div>
-              <div className="mt-8 space-y-4">
-                {todayPlan.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                    <div>
-                      <p className="text-base font-semibold text-slate-950">{item.label}</p>
-                      <p className="text-xs text-slate-500">{item.time}</p>
+
+                <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br ${activeChallenge.gradient} text-3xl`}>
+                        <span>{activeChallenge.icon}</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-500">{activeChallenge.category}</p>
+                        <h4 className="mt-2 text-xl font-semibold text-slate-950">{activeChallenge.title}</h4>
+                      </div>
                     </div>
-                    <span className={`inline-flex h-8 items-center justify-center rounded-full px-3 text-xs font-semibold ${item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}`}>
-                      {item.done ? '✔' : '○'}
+                    <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">{activeChallenge.category}</div>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">{activeChallenge.description}</p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {challengeCategories.map((category) => (
+                    <span key={category} className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
+                      {category}
                     </span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 text-right">
-                <button type="button" onClick={() => navigate('/mood')} className="text-sm font-semibold text-violet-600 hover:text-violet-700">View Full Plan →</button>
+                  ))}
+                </div>
               </div>
             </Card>
 
-            <Card className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Guided Breathing</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">Calm Breathing</h3>
+            <Card className="overflow-hidden rounded-[32px] border border-white/70 bg-gradient-to-br from-[#fff5fb] via-[#f8fcff] to-[#f3f8ff] p-6 shadow-[0_28px_90px_rgba(124,58,237,0.12)]">
+              <div className="space-y-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Gratitude Prompt</p>
+                    <h3 className="mt-2 text-2xl font-semibold text-slate-950">Today, I’m grateful for…</h3>
+                  </div>
+                  <div className="rounded-full bg-pink-100 px-4 py-2 text-sm font-semibold text-pink-700 shadow-sm">
+                    {dailyPrompt}
+                  </div>
                 </div>
-                <Play className="h-6 w-6 text-violet-600" />
-              </div>
-              <div className="mt-8 flex items-center justify-between rounded-[28px] border border-violet-200 bg-violet-50 p-5 shadow-sm">
-                <div>
-                  <p className="text-sm text-slate-500">2 min • Box Breathing</p>
-                  <p className="mt-3 text-lg font-semibold text-slate-950">Breathe in, hold, breathe out</p>
+
+                <textarea
+                  value={gratitudeInput}
+                  onChange={(event) => setGratitudeInput(event.target.value)}
+                  rows={5}
+                  placeholder={dailyPrompt}
+                  className="w-full rounded-[28px] border border-slate-200 bg-white/90 px-5 py-4 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+                />
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={handleSaveGratitude}
+                    className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:from-violet-700 hover:to-fuchsia-700"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {editingGratitudeId ? 'Update Gratitude' : 'Save Gratitude'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewAllGratitudes((state) => !state)}
+                    className={`inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold ${gratitudeCount > 0 ? 'text-slate-700 hover:border-slate-300' : 'cursor-not-allowed text-slate-400'}`}
+                    disabled={gratitudeCount === 0}
+                  >
+                    {viewAllGratitudes ? 'Show Less' : `View Notes (${gratitudeCount})`}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
                 </div>
-                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-[0_15px_40px_rgba(124,58,237,0.18)]" />
+
+                {showGratitudeNotes && (
+                  <>
+                    <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
+                      Showing {gratitudeCount} saved note{gratitudeCount === 1 ? '' : 's'}
+                    </p>
+                    <div className="space-y-3 overflow-hidden rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm">
+                      {visibleGratitudeNotes.length === 0 ? (
+                        <p className="text-sm text-slate-500">Your saved gratitude notes will appear here.</p>
+                      ) : (
+                        visibleGratitudeNotes.map((note) => (
+                          <div key={note.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <p className="text-sm text-slate-900">{note.text}</p>
+                                <p className="mt-2 text-xs text-slate-500">{note.date}</p>
+                              </div>
+                              <div className="flex items-center gap-2 text-slate-500">
+                                <button type="button" onClick={() => handleEditGratitude(note.id)} className="rounded-full p-2 transition hover:bg-slate-100">
+                                  <Edit3 className="h-4 w-4" />
+                                </button>
+                                <button type="button" onClick={() => handleDeleteGratitude(note.id)} className="rounded-full p-2 text-rose-500 transition hover:bg-rose-50">
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
-              <Button onClick={() => navigate('/breathing')} className="mt-6 w-full rounded-full bg-violet-600 text-white hover:bg-violet-700">▶ Start Breathing</Button>
             </Card>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Habit Tracker</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">Healthy habits</h3>
-                </div>
-                <Activity className="h-6 w-6 text-slate-600" />
-              </div>
-              <div className="mt-8 space-y-5">
-                {habitTracker.map((item) => (
-                  <div key={item.label}>
-                    <div className="flex items-center justify-between text-sm font-semibold text-slate-700">
-                      <span>{item.label}</span>
-                      <span>{item.progress}%</span>
-                    </div>
-                    <div className="mt-3 h-2.5 rounded-full bg-slate-200 overflow-hidden">
-                      <div className={`h-full rounded-full bg-gradient-to-r ${item.color}`} style={{ width: `${item.progress}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Journal Preview</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">Today&apos;s reflection</h3>
-                </div>
-                <BookOpen className="h-6 w-6 text-slate-600" />
-              </div>
-              <div className="mt-8 rounded-[28px] border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm text-slate-600">“Today was more productive than I expected. The breathing session in the morning really helped me stay calm.”</p>
-                <p className="mt-4 text-xs text-slate-500">4:35 PM</p>
-              </div>
-              <Button onClick={() => navigate('/mood')} className="mt-6 w-full rounded-full bg-violet-600 text-white hover:bg-violet-700">Continue Writing</Button>
-            </Card>
-
+          <div className="grid gap-6 lg:grid-cols-2">
             <Card className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -358,88 +601,28 @@ export function DashboardPage() {
                 ))}
               </div>
             </Card>
-          </div>
 
-          <div className="grid gap-6 xl:grid-cols-3">
-            <Card className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-[28px] border border-indigo-200 bg-gradient-to-br from-indigo-50 via-sky-50 to-violet-50 p-6 shadow-[0_28px_90px_rgba(99,102,241,0.18)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Sleep Wellness</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">Rest quality</h3>
+                  <p className="text-sm uppercase tracking-[0.32em] text-indigo-600">Guided Breathing</p>
+                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">Calm Breathing</h3>
                 </div>
-                <Moon className="h-6 w-6 text-slate-600" />
-              </div>
-              <div className="mt-8 space-y-5">
-                <div className="rounded-[28px] bg-slate-50 p-4">
-                  <div className="flex items-center justify-between text-sm font-semibold text-slate-900">
-                    <span>Sleep duration</span>
-                    <span>7h 20m</span>
-                  </div>
-                  <div className="mt-3 h-2.5 rounded-full bg-slate-200 overflow-hidden">
-                    <div className="h-full w-[86%] rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500" />
-                  </div>
-                </div>
-                <div className="rounded-[28px] bg-slate-50 p-4">
-                  <p className="text-sm text-slate-600">Good Sleep Quality</p>
-                </div>
-                <div className="rounded-[28px] border border-slate-200 bg-white p-4">
-                  <div className="h-28">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={sleepTrendData}>
-                        <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#68738D' }} axisLine={false} tickLine={false} />
-                        <Tooltip cursor={{ fill: 'rgba(148,163,184,0.1)' }} />
-                        <Bar dataKey="value" radius={[12,12,0,0]} fill="#8B5CF6" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-sky-100 text-sky-700 shadow-sm">
+                  <span className="text-xl">🌀</span>
                 </div>
               </div>
-            </Card>
-
-            <Card className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Achievements</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">Milestones</h3>
-                </div>
-                <Sparkles className="h-6 w-6 text-slate-600" />
+              <div className="mt-6 rounded-[28px] border border-indigo-100 bg-white p-5 shadow-sm">
+                <p className="text-sm font-semibold text-slate-900">2 min • Box Breathing</p>
+                <p className="mt-2 text-sm text-slate-600">Breathe in, hold, breathe out</p>
               </div>
-              <div className="mt-8 grid gap-4">
-                {achievementsData.map((item) => (
-                  <div key={item.title} className={`rounded-[28px] border border-slate-200 p-4 bg-gradient-to-r ${item.bg}`}>
-                    <div className="flex items-center gap-3">
-                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-3xl bg-white/70 text-slate-950 shadow-sm">{item.emoji}</div>
-                      <div>
-                        <p className="text-base font-semibold text-slate-950">{item.title}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Wellness Stats</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">Momentum</h3>
-                </div>
-                <CheckCircle2 className="h-6 w-6 text-slate-600" />
-              </div>
-              <div className="mt-8 grid gap-4">
-                {miniStats.map((item) => (
-                  <div key={item.title} className={`rounded-3xl border border-slate-200 p-4 ${item.bg}`}>
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                        <p className="mt-2 text-xs text-slate-600">{item.subtitle}</p>
-                      </div>
-                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-3xl bg-white/90 text-slate-900 shadow-sm">{item.emoji}</div>
-                    </div>
-                    <p className="mt-4 text-2xl font-semibold text-slate-950">{item.value}</p>
-                  </div>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/breathing')}
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700"
+              >
+                Start Breathing
+              </button>
             </Card>
           </div>
 

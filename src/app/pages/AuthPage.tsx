@@ -18,9 +18,10 @@ export function AuthPage() {
     password: '',
   });
 
-  // Check if user came from cart/checkout
+  // Check if user came from cart/checkout/community
   const fromCheckout = location.state?.from === 'checkout';
   const fromCart = location.state?.from === 'cart';
+  const fromCommunity = location.state?.from === 'community';
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGuestAccess = () => {
@@ -183,7 +184,7 @@ export function AuthPage() {
               {activeTab === 'signup' ? 'Create Account' : 'Log In'}
             </button>
 
-            {activeTab === 'login' && (
+            {!fromCommunity && (
               <button
                 type="button"
                 onClick={handleGuestAccess}

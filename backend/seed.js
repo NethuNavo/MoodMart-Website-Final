@@ -386,6 +386,16 @@ const products = [
     "reviews": 178,
     "description": "Ultrasonic diffuser with LED lighting",
     "image": "https://images.unsplash.com/photo-1707920961189-290d19b363f3?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Insomnia Sleeping Kit",
+    "category": "supplement",
+    "price": 8000.00,
+    "rating": 4.7,
+    "reviews": 92,
+    "description": "A calming sleep bundle with soothing sleep aids to support restful nights.",
+    "tag": "Recommended",
+    "image": "/sleeping-kit.jpg"
   }
 ];
 

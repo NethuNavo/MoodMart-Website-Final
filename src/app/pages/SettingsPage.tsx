@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 const settingsHeaderImage = new URL('../../assets/368203aed1d463941c676b9b75867fef801eaf37.png', import.meta.url).href;
 
 export function SettingsPage() {
-  const { logout } = useMood();
+  const { logout, currentTheme, setCurrentTheme, autoThemeEnabled, setAutoThemeEnabled } = useMood();
   const navigate = useNavigate();
 
   // Notifications
@@ -15,7 +15,6 @@ export function SettingsPage() {
   const [promotionalEmails, setPromotionalEmails] = useState(false);
 
   // App Preferences
-  const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('light');
   const [language, setLanguage] = useState('en');
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
 
@@ -136,27 +135,65 @@ export function SettingsPage() {
             </div>
 
             <div className="space-y-6">
-              {/* Theme */}
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-3">Theme</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {(['light', 'dark', 'auto'] as const).map((themeOption) => (
+                <label className="block text-sm font-medium text-gray-900 mb-3">Color Theme</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: 'neutral', label: 'Neutral', emoji: '🙂' },
+                    { key: 'happy', label: 'Happy', emoji: '😊' },
+                    { key: 'sad', label: 'Sad', emoji: '😢' },
+                    { key: 'angry', label: 'Angry', emoji: '😠' },
+                    { key: 'fearful', label: 'Fearful', emoji: '😨' },
+                    { key: 'disgusted', label: 'Disgusted', emoji: '🤢' },
+                    { key: 'surprised', label: 'Surprised', emoji: '😲' },
+                  ].map((themeOption) => (
                     <button
-                      key={themeOption}
-                      onClick={() => setTheme(themeOption)}
-                      className={`px-4 py-3 rounded-lg border-2 transition-all capitalize ${
-                        theme === themeOption
-                          ? 'border-purple-600 bg-purple-50 text-purple-600'
-                          : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
+                      key={themeOption.key}
+                      onClick={() => setCurrentTheme(themeOption.key as any)}
+                      className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all ${
+                        currentTheme === themeOption.key
+                          ? 'border-purple-600 bg-purple-50 text-purple-800 shadow-sm'
+                          : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 hover:bg-gray-100'
                       }`}
                     >
-                      {themeOption}
+                      <span className="text-xl">{themeOption.emoji}</span>
+                      <div>
+                        <div className="font-semibold capitalize">{themeOption.label}</div>
+                        <div className="text-xs text-gray-500">
+                          {themeOption.key === 'neutral' ? 'Soft neutral palette' :
+                           themeOption.key === 'happy' ? 'Warm bright palette' :
+                           themeOption.key === 'sad' ? 'Cool calm palette' :
+                           themeOption.key === 'angry' ? 'Bold alert palette' :
+                           themeOption.key === 'fearful' ? 'Clear blue palette' :
+                           themeOption.key === 'disgusted' ? 'Fresh green palette' :
+                           'Bright teal palette'}
+                        </div>
+                      </div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Language */}
+              {/* Auto Theme Toggle */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900">Auto Theme Change</p>
+                  <p className="text-sm text-gray-600">Automatically change theme based on your mood</p>
+                </div>
+                <button
+                  onClick={() => setAutoThemeEnabled(!autoThemeEnabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    autoThemeEnabled ? 'bg-purple-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      autoThemeEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
               <div>
                 <label htmlFor="language" className="block text-sm font-medium text-gray-900 mb-2">
                   Language

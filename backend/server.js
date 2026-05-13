@@ -15,6 +15,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/mood-entries', require('./routes/moodEntries'));
 
 const requiredEnvVars = [
   'MONGO_URI',

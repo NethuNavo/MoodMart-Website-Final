@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Play, Pause, SkipForward, SkipBack, Volume2, Clock, Headphones, Search } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { useMood, MoodEntry } from '../context/MoodContext';
 const headerBg = new URL('../../assets/a29c988cecf7518aefa1051e53ffc3b671037802.png', import.meta.url).href;
 const audioTherapyImage = new URL('../../assets/e2b640b8b8dd6e106e29853af90b36d6d877ec1d.png', import.meta.url).href;
 const calmCoverImage = new URL('../../assets/calm.jpg', import.meta.url).href;
 const anxietyCoverImage = new URL('../../assets/images.jpg', import.meta.url).href;
+const sleepyMarimbaImage = new URL('../../assets/sleeping-soundly-science-getting-restful-sleep-hero.webp', import.meta.url).href;
 
 export function AudioTherapyPage() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -126,7 +128,59 @@ export function AudioTherapyPage() {
       image: new URL('../../assets/deep.jpg', import.meta.url).href,
       audioUrl: '/audio/white_records-breath-of-autumn-instrumental-background-music-for-video-46-sec-487275%20(1).mp3'
     },
+    {
+      id: 12,
+      title: 'Sleepy Marimba and Vibraphone',
+      category: 'Sleep',
+      duration: '28:00',
+      description: 'A gentle marimba and vibraphone track designed to ease insomnia and guide you toward restful sleep.',
+      color: 'from-indigo-500 to-violet-600',
+      image: sleepyMarimbaImage,
+      audioUrl: '/audio/zec53-sleepy-marimba-and-vibraphone-ending-271446.mp3'
+    },
   ];
+
+  const { currentMoodEntry } = useMood();
+
+  const moodAudioMap: Record<MoodEntry['mood'], number[]> = {
+    happy: [3, 2, 4],
+    calm: [3, 2, 4],
+    relaxed: [3, 2, 4],
+    content: [3, 2, 4],
+    energetic: [3, 1, 5],
+    motivated: [3, 1, 5],
+    grateful: [3, 4, 10],
+    okay: [3, 2, 4],
+    normal: [3, 2, 4],
+    focused: [3, 2, 4],
+    bored: [2, 3, 5],
+    stressed: [8, 4, 1],
+    anxious: [8, 4, 1],
+    overwhelmed: [8, 1, 4],
+    sad: [4, 8, 1],
+    frustrated: [1, 5, 8],
+    angry: [1, 5, 8],
+    lonely: [4, 8, 1],
+    sleepy: [7, 12, 10],
+    tired: [7, 12, 10],
+    exhausted: [7, 12, 10],
+    rested: [3, 4, 11],
+    insomnia: [12, 7, 4],
+    depressed: [4, 8, 1],
+    confused: [4, 2, 8],
+    'mentally-drained': [4, 7, 8],
+    overthinking: [4, 2, 8],
+  };
+
+  const recommendedAudioTracks = useMemo(() => {
+    if (!currentMoodEntry) {
+      return [tracks[0], tracks[1], tracks[3]];
+    }
+
+    const selection = moodAudioMap[currentMoodEntry.mood] || [];
+    const recommended = tracks.filter((track) => selection.includes(track.id));
+    return recommended.length ? recommended : [tracks[0], tracks[1], tracks[3]];
+  }, [currentMoodEntry]);
 
   const categories = ['All', 'Stress Relief', 'Anxiety', 'Depression', 'Sleep', 'Meditation', 'Wellness'];
   const location = useLocation();
@@ -312,6 +366,49 @@ export function AudioTherapyPage() {
                 {category}
               </button>
             ))}
+          </div>
+
+          {/* Recommended audio for current mood */}
+          <div className="mb-10 rounded-3xl bg-white shadow-xl p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-semibold">Mood-based audio recommendations</h2>
+                <p className="mt-2 text-sm text-slate-600">
+                  {currentMoodEntry
+                    ? `Songs matched to your latest mood: ${currentMoodEntry.mood}.`
+                    : 'Log a mood entry to see curated audio suggestions.'}
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-full bg-violet-100 px-4 py-2 text-sm font-semibold text-violet-700">
+                {currentMoodEntry ? `Mood: ${currentMoodEntry.mood}` : 'No mood data yet'}
+              </span>
+            </div>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              {recommendedAudioTracks.map((track) => (
+                <button
+                  key={track.id}
+                  onClick={() => setCurrentTrack(tracks.findIndex((item) => item.id === track.id))}
+                  className="rounded-3xl border border-slate-200 overflow-hidden text-left transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="relative h-40 overflow-hidden rounded-t-3xl bg-slate-200">
+                    <ImageWithFallback
+                      src={track.image}
+                      alt={`${track.title} cover`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="text-sm font-semibold text-slate-700">{track.category}</div>
+                    <h3 className="mt-2 text-lg font-semibold text-slate-900">{track.title}</h3>
+                    <p className="mt-2 text-sm text-slate-600">{track.description}</p>
+                    <div className="mt-4 flex items-center justify-between text-sm text-slate-500">
+                      <span>{track.duration}</span>
+                      <span>Play now</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Search Bar */}
