@@ -46,18 +46,20 @@ export function Header() {
     <>
       <header className="site-header sticky top-0 z-50">
         <div className="container">
-          <div className="flex flex-wrap items-center justify-between gap-3 py-2 md:flex-nowrap md:h-18">
-            <Link to="/" className="flex items-center gap-3 group">
+          <div className="flex h-16 items-center justify-between gap-4 md:gap-6">
+            {/* Left: Logo */}
+            <Link to="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0 group">
               <img src={logo} alt="MoodMart" className="h-10 w-10 md:h-12 md:w-12 transform group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xl md:text-2xl lux-heading">MoodMart</span>
+              <span className="hidden sm:inline text-lg md:text-2xl lux-heading">MoodMart</span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-4 flex-1 min-w-0">
+            {/* Center: Navigation + Admin */}
+            <nav className="hidden md:flex items-center gap-6 flex-1">
               {navLinks.map(link => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                     location.pathname === link.to
                       ? 'text-purple-700 bg-purple-50 shadow-sm'
                       : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
@@ -66,10 +68,15 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
+            </nav>
+
+            {/* Right Side Group */}
+            <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
+              {/* Admin Link - Visible on md+ screens */}
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                     location.pathname === '/admin'
                       ? 'text-purple-700 bg-purple-50 shadow-sm'
                       : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
@@ -78,27 +85,17 @@ export function Header() {
                   Admin
                 </Link>
               )}
-            </nav>
 
-            <button
-              type="button"
-              aria-label="Toggle mobile menu"
-              aria-expanded={isMobileMenuOpen}
-              onClick={() => setIsMobileMenuOpen((open) => !open)}
-              className="md:hidden p-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-all duration-200"
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-
-            <div className="flex flex-wrap items-center gap-3 justify-end flex-shrink-0">
-              <button 
+              {/* Cart Icon */}
+              <button
                 onClick={() => setIsMiniCartOpen(true)}
-                className="relative cursor-pointer group"
+                className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition-all duration-200 hover:border-purple-300 hover:text-purple-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-300 group"
+                aria-label="Open cart"
               >
-                <ShoppingCart className={`h-6 w-6 transition-all duration-300 group-hover:text-purple-600 group-hover:scale-110 ${isMiniCartOpen ? 'text-purple-600' : 'text-gray-600'}`} />
+                <ShoppingCart className={`h-5 w-5 transition-all duration-300 group-hover:scale-110 ${isMiniCartOpen ? 'text-purple-600' : 'text-gray-600'}`} />
                 {cartItemsCount > 0 && (
-                  <span 
-                    className={`absolute -top-2 -right-2 bg-gradient-to-r from-var(--lux-primary) to-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center transition-all shadow-lg ${
+                  <span
+                    className={`absolute -top-1 -right-1 bg-gradient-to-r from-var(--lux-primary) to-pink-600 text-white text-[11px] rounded-full h-5 w-5 flex items-center justify-center transition-all shadow-lg font-semibold ${
                       cartAnimation ? 'animate-bounce scale-110' : ''
                     }`}
                   >
@@ -106,14 +103,26 @@ export function Header() {
                   </span>
                 )}
               </button>
-              
+
+              {/* Profile Dropdown or Login */}
               {isAuthenticated ? (
                 <UserProfileDropdown />
               ) : (
-                <Link to="/auth" className="lux-btn-primary px-4 py-2">
+                <Link to="/auth" className="lux-btn-primary h-10 px-4 flex items-center justify-center text-sm font-medium">
                   Login
                 </Link>
               )}
+
+              {/* Mobile Menu Toggle */}
+              <button
+                type="button"
+                aria-label="Toggle mobile menu"
+                aria-expanded={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen((open) => !open)}
+                className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-all duration-200"
+              >
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
             </div>
           </div>
 

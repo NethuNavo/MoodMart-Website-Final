@@ -51,12 +51,12 @@ export function UserProfileDropdown() {
       {/* Profile Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-[0_15px_30px_-15px_rgba(124,58,237,0.65)] transition-all duration-200 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-purple-400 group min-w-[140px] max-w-[220px] flex-shrink-0"
+        className="flex h-10 items-center gap-2 rounded-full bg-gradient-to-r from-purple-600 to-violet-600 px-3 text-white shadow-[0_15px_30px_-15px_rgba(124,58,237,0.65)] transition-all duration-200 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-purple-400 group min-w-fit max-w-[200px] flex-shrink-0"
         aria-label="User profile menu"
         aria-expanded={isOpen}
       >
         {/* Circular Avatar */}
-        <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm transition-all duration-200">
+        <div className="relative w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-xs transition-all duration-200">
           {initials}
         </div>
 
@@ -67,7 +67,7 @@ export function UserProfileDropdown() {
 
         {/* Dropdown Arrow */}
         <ChevronDown
-          className={`h-4 w-4 text-white transition-transform duration-300 ${
+          className={`h-4 w-4 text-white transition-transform duration-300 flex-shrink-0 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
