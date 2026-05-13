@@ -1,1 +1,0 @@
-[{"_id":{"$oid":"6a00c45e373e1b2aeae5d01f"},"user":"admin@moodmart.com","totalEntries":20,"currentStreak":7,"averageStress":2.5,"wellnessScore":75,"achievements":["First Step","Week Warrior"],"date":{"$date":"2026-01-26T09:00:00Z"},"__v":0,"createdAt":{"$date":"2026-05-10T17:46:06.043Z"},"updatedAt":{"$date":"2026-05-10T17:46:06.043Z"}}]
