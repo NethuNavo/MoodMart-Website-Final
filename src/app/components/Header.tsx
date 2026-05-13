@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X } from 'lucide-react';
 import { useMood } from '../context/MoodContext';
 import { useUser } from '../context/UserContext';
 import { MiniCart } from './MiniCart';
+import { UserProfileDropdown } from './UserProfileDropdown';
 import { useState, useEffect } from 'react';
 const logo = new URL('../../assets/0b38a103a78cc9cd2458edca47c9ee2cf8746513.png', import.meta.url).href;
 
@@ -45,13 +46,13 @@ export function Header() {
     <>
       <header className="site-header sticky top-0 z-50">
         <div className="container">
-          <div className="flex flex-wrap items-center justify-between gap-3 py-2 md:h-18">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-2 md:flex-nowrap md:h-18">
             <Link to="/" className="flex items-center gap-3 group">
               <img src={logo} alt="MoodMart" className="h-10 w-10 md:h-12 md:w-12 transform group-hover:scale-110 transition-transform duration-300" />
               <span className="text-xl md:text-2xl lux-heading">MoodMart</span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-4">
+            <nav className="hidden md:flex items-center gap-4 flex-1 min-w-0">
               {navLinks.map(link => (
                 <Link
                   key={link.to}
@@ -89,7 +90,7 @@ export function Header() {
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 justify-end flex-shrink-0">
               <button 
                 onClick={() => setIsMiniCartOpen(true)}
                 className="relative cursor-pointer group"
@@ -107,14 +108,7 @@ export function Header() {
               </button>
               
               {isAuthenticated ? (
-                <>
-                  <Link to="/profile" className="text-gray-600 hover:text-purple-600 transition-all duration-300 hover:scale-110">
-                    <User className="h-6 w-6" />
-                  </Link>
-                  <button onClick={() => { logout(); logoutUser(); }} className="text-gray-600 hover:text-red-600 transition-all duration-300 hover:scale-110">
-                    <LogOut className="h-6 w-6" />
-                  </button>
-                </>
+                <UserProfileDropdown />
               ) : (
                 <Link to="/auth" className="lux-btn-primary px-4 py-2">
                   Login

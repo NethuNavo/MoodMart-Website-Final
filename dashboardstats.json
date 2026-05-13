@@ -1,0 +1,1 @@
+[{"_id":{"$oid":"6a00c45e373e1b2aeae5d01d"},"user":"admin@moodmart.com","averageStress":2.5,"streak":7,"recommendations":["Continue Your Streak","Try Morning Meditation"],"date":{"$date":"2026-01-26T09:00:00Z"},"__v":0,"createdAt":{"$date":"2026-05-10T17:46:06.039Z"},"updatedAt":{"$date":"2026-05-10T17:46:06.039Z"}}]

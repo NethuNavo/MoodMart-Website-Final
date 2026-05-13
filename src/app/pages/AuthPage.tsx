@@ -10,7 +10,7 @@ export function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useMood();
-  const { registerUser, loginUser } = useUser();
+  const { registerUser, loginUser, logoutUser } = useUser();
   const [activeTab, setActiveTab] = useState<'signup' | 'login'>('signup');
   const [formData, setFormData] = useState({
     fullName: '',
@@ -22,6 +22,11 @@ export function AuthPage() {
   const fromCheckout = location.state?.from === 'checkout';
   const fromCart = location.state?.from === 'cart';
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleGuestAccess = () => {
+    logoutUser();
+    navigate(fromCheckout ? '/checkout' : fromCart ? '/cart' : '/shop');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +182,16 @@ export function AuthPage() {
             >
               {activeTab === 'signup' ? 'Create Account' : 'Log In'}
             </button>
+
+            {activeTab === 'login' && (
+              <button
+                type="button"
+                onClick={handleGuestAccess}
+                className="w-full mt-4 border border-purple-600 text-purple-600 py-3 rounded-full font-semibold text-lg transition-colors hover:bg-purple-50"
+              >
+                Continue as Guest
+              </button>
+            )}
           </form>
 
           {/* Already have account / Don't have account */}

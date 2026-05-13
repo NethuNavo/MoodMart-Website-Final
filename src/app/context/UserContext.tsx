@@ -19,6 +19,9 @@ export interface UserContextType {
   isGuest: boolean;
   isRegistered: boolean;
   isAdmin: boolean;
+  guestFaceScanUsed: boolean;
+  markGuestFaceScanUsed: () => void;
+  resetGuestFaceScanUsed: () => void;
   registerUser: (userData: { name: string; email: string; password: string }) => void;
   loginUser: (userData: { id?: string; name: string; email: string; role: UserRole; hasCompletedOrder?: boolean }) => void;
   logoutUser: () => void;
@@ -31,7 +34,22 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function useUser() {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within UserProvider');
+    // Return safe defaults during hot reload or if provider is missing
+    return {
+      user: { userType: 'guest', role: 'user', hasCompletedOrder: false },
+      setUser: () => {},
+      isGuest: true,
+      isRegistered: false,
+      isAdmin: false,
+      guestFaceScanUsed: false,
+      markGuestFaceScanUsed: () => {},
+      resetGuestFaceScanUsed: () => {},
+      registerUser: () => {},
+      loginUser: () => {},
+      logoutUser: () => {},
+      convertGuestToRegistered: () => {},
+      markOrderComplete: () => {},
+    };
   }
   return context;
 }
@@ -48,6 +66,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       role: 'user',
       hasCompletedOrder: false,
     };
+  });
+
+  // Track guest face scan usage
+  const [guestFaceScanUsed, setGuestFaceScanUsed] = useState(() => {
+    return localStorage.getItem('moodmart_guest_face_scan_used') === 'true';
   });
 
   useEffect(() => {
@@ -80,6 +103,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const isGuest = user.userType === 'guest';
   const isRegistered = user.userType === 'registered';
+
+  const markGuestFaceScanUsed = () => {
+    setGuestFaceScanUsed(true);
+    localStorage.setItem('moodmart_guest_face_scan_used', 'true');
+  };
+
+  const resetGuestFaceScanUsed = () => {
+    setGuestFaceScanUsed(false);
+    localStorage.removeItem('moodmart_guest_face_scan_used');
+  };
 
   const registerUser = (userData: { name: string; email: string; password: string }) => {
     const newUser: User = {
@@ -115,6 +148,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(guest);
     tokenManager.removeToken();
     localStorage.removeItem('moodmart_user');
+    resetGuestFaceScanUsed();
   };
 
   const convertGuestToRegistered = () => {
@@ -143,6 +177,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         isGuest,
         isRegistered,
         isAdmin,
+        guestFaceScanUsed,
+        markGuestFaceScanUsed,
+        resetGuestFaceScanUsed,
         registerUser,
         loginUser,
         logoutUser,

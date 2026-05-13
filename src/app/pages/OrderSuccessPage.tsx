@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { API_BASE_URL } from '../utils/api';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -36,7 +37,7 @@ export function OrderSuccessPage() {
 
   const verifyPayment = async (sessionId: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/verify-payment`, {
+      const response = await fetch(`${API_BASE_URL}/api/payments/verify-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

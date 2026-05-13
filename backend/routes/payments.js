@@ -124,6 +124,17 @@ async function sendOrderConfirmationEmail(session) {
 // Create Stripe checkout session
 router.post('/create-checkout-session', async (req, res) => {
   try {
+    // Validate environment
+    if (!process.env.CLIENT_URL) {
+      console.error('CLIENT_URL environment variable is not set')
+      return res.status(500).json({ error: 'Server configuration error: CLIENT_URL not set' })
+    }
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY environment variable is not set')
+      return res.status(500).json({ error: 'Server configuration error: STRIPE_SECRET_KEY not set' })
+    }
+
     const { cart, shipping, customer } = req.body
 
     // Validate required data
@@ -151,6 +162,7 @@ router.post('/create-checkout-session', async (req, res) => {
     const total = subtotal + shippingCost
 
     // Create checkout session
+    console.log('Creating Stripe session with CLIENT_URL:', process.env.CLIENT_URL)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
@@ -176,15 +188,20 @@ router.post('/create-checkout-session', async (req, res) => {
       }
     })
 
+    console.log('Stripe session created successfully:', session.id)
+    console.log('Checkout URL:', session.url)
     res.json({
       url: session.url,
       sessionId: session.id
     })
   } catch (error) {
-    console.error('Stripe checkout session error:', error)
+    console.error('Stripe checkout session error:', error.message || error)
+    console.error('Error stack:', error.stack)
+    console.error('Request body:', req.body)
     res.status(500).json({
       error: 'Failed to create checkout session',
-      details: error.message
+      details: error.message,
+      type: error.type
     })
   }
 })

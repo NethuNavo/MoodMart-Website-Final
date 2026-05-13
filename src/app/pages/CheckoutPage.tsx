@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMood } from '../context/MoodContext';
 import { useUser } from '../context/UserContext';
+import { API_BASE_URL } from '../utils/api';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -122,7 +123,8 @@ export function CheckoutPage() {
       };
 
       // Call Stripe API
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/create-checkout-session`, {
+      console.log('Calling create-checkout-session with API_BASE_URL:', API_BASE_URL);
+      const response = await fetch(`${API_BASE_URL}/api/payments/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,21 +132,24 @@ export function CheckoutPage() {
         body: JSON.stringify(checkoutData)
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
       console.log('Stripe checkout response:', data);
 
       if (!response.ok) {
-        throw new Error(data.error || data.details || 'Failed to create checkout session');
+        throw new Error(data.error || data.details || `Failed to create checkout session: ${response.status}`);
       }
 
       if (data.url) {
+        console.log('Redirecting to Stripe checkout:', data.url);
         // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {
-        throw new Error(data.error || 'Failed to create checkout session');
+        throw new Error(data.error || 'No checkout URL received from server');
       }
     } catch (error: any) {
       console.error('Payment error:', error);
+      console.error('Error details:', error.message);
       toast.error(`Payment setup failed: ${error.message || 'Please try again.'}`);
       setIsProcessing(false);
     }

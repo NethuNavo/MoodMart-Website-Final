@@ -1,3 +1,7 @@
+require('dotenv').config();
+const mongoose = require('mongoose');
+
+// Import Models
 const CartSession = require('./models/CartSession');
 const CheckoutSession = require('./models/CheckoutSession');
 const DashboardStat = require('./models/DashboardStat');
@@ -5,6 +9,20 @@ const Profile = require('./models/Profile');
 const Settings = require('./models/Settings');
 const ShopProduct = require('./models/ShopProduct');
 const OrderSuccess = require('./models/OrderSuccess');
+const BreathingSession = require('./models/BreathingSession');
+const FaceScanSession = require('./models/FaceScanSession');
+const CommunityPost = require('./models/CommunityPost');
+const QASession = require('./models/QASession');
+const CommunityQuestion = require('./models/CommunityQuestion');
+const MoodEntry = require('./models/MoodEntry');
+const Notification = require('./models/Notification');
+const Order = require('./models/Order');
+const Product = require('./models/Product');
+const User = require('./models/User');
+const AudioTrack = require('./models/AudioTrack');
+
+// MongoDB URI
+const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mernapp';
 const cartSessions = [
   { user: 'admin@moodmart.com', items: [{ productId: '1', quantity: 2, price: 2499.00 }], subtotal: 4998, shipping: 300, discount: 0, total: 5298, date: new Date('2026-01-25T10:00:00Z') },
   { user: 'jane@moodmart.com', items: [{ productId: '2', quantity: 1, price: 1899.00 }], subtotal: 1899, shipping: 300, discount: 0, total: 2199, date: new Date('2026-01-26T12:00:00Z') }
@@ -37,8 +55,7 @@ const orderSuccesses = [
   { user: 'admin@moodmart.com', orderId: 'ORD123', completed: true, date: new Date('2026-01-25T10:20:00Z') },
   { user: 'jane@moodmart.com', orderId: 'ORD124', completed: true, date: new Date('2026-01-26T12:20:00Z') }
 ];
-const BreathingSession = require('./models/BreathingSession');
-const FaceScanSession = require('./models/FaceScanSession');
+
 const breathingSessions = [
   { durationMinutes: 5, cycles: 4, completed: true, date: new Date('2026-01-20T08:00:00Z') },
   { durationMinutes: 8, cycles: 5, completed: true, date: new Date('2026-01-21T09:00:00Z') },
@@ -52,9 +69,7 @@ const faceScanSessions = [
   { mood: 'anxious', confidence: 0.76, result: 'Detected anxious expression', date: new Date('2026-01-22T10:30:00Z') },
   { mood: 'tired', confidence: 0.81, result: 'Detected tired expression', date: new Date('2026-01-23T11:30:00Z') }
 ];
-const CommunityPost = require('./models/CommunityPost');
-const QASession = require('./models/QASession');
-const CommunityQuestion = require('./models/CommunityQuestion');
+
 const communityPosts = [
   {
     id: '1',
@@ -145,9 +160,7 @@ const communityQuestions = [
     isSaved: false,
   },
 ];
-const MoodEntry = require('./models/MoodEntry');
-const Notification = require('./models/Notification');
-const Order = require('./models/Order');
+
 const moodEntries = [
   { date: '2026-01-20', mood: 'happy', intensity: 5, stressLevel: 1, notes: 'Had a great day at work!' },
   { date: '2026-01-21', mood: 'stressed', intensity: 2, stressLevel: 4, notes: 'Deadlines were tough.' },
@@ -194,74 +207,111 @@ const orders = [
     createdAt: new Date('2026-01-26T12:00:00Z')
   }
 ];
-const mongoose = require('mongoose');
-const Product = require('./models/Product');
-const User = require('./models/User');
-const AudioTrack = require('./models/AudioTrack');
+
 const audioTracks = [
   {
     title: 'Ocean Waves for Relaxation',
     category: 'Stress Relief',
     duration: '15:00',
-    description: 'Gentle ocean sounds to calm your mind and reduce stress',
+    description: 'Gentle ocean sounds to calm your mind and reduce stress.',
     color: 'from-blue-400 to-cyan-500',
     image: 'https://images.unsplash.com/photo-1661953029179-e1b0dc900490?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvY2VhbiUyMHdhdmVzJTIwYmVhY2h8ZW58MXx8fHwxNzY2Mzc2MjY2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'https://cdn.pixabay.com/audio/2022/05/13/audio_257112ce99.mp3'
+    audioUrl: '/audio/intensity-by-audio-club-intensity-by-audio-club-343637.mp3'
   },
   {
     title: 'Forest Ambience',
     category: 'Meditation',
     duration: '20:00',
-    description: 'Peaceful forest sounds for deep meditation',
+    description: 'Peaceful forest sounds for deep meditation.',
     color: 'from-purple-400 to-purple-500',
     image: 'https://images.unsplash.com/photo-1656783208368-a7d176736535?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjBuYXR1cmUlMjB0cmVlc3xlbnwxfHx8fDE3NjYzMDYxMDl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'https://cdn.pixabay.com/audio/2022/03/10/audio_4a6bf5a518.mp3'
+    audioUrl: '/audio/audiopapkin-forest-ambience-296528.mp3'
+  },
+  {
+    title: 'Morning Birdsong',
+    category: 'Wellness',
+    duration: '18:30',
+    description: 'Warm bird sounds to ease into a gentle morning routine.',
+    color: 'from-emerald-400 to-sky-500',
+    image: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    audioUrl: '/audio/creative_spark-morning-birdsong-246402.mp3'
+  },
+  {
+    title: 'Calm Music',
+    category: 'Relaxation',
+    duration: '16:12',
+    description: 'A soft ambient track for clearing the mind and centering your breath.',
+    color: 'from-slate-400 to-slate-500',
+    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    audioUrl: '/audio/freesound_community-calm-music-64526.mp3'
+  },
+  {
+    title: 'Aquarium Ambience',
+    category: 'Stress Relief',
+    duration: '10:00',
+    description: 'Underwater ambience for a soothing, restorative focus session.',
+    color: 'from-cyan-400 to-blue-500',
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    audioUrl: '/audio/joelfazhari-aquarium-ambience-sounds-10-min-193236.mp3'
   },
   {
     title: 'Anxiety Relief Meditation',
     category: 'Anxiety',
     duration: '12:00',
-    description: 'Guided meditation specifically designed for anxiety management',
+    description: 'Guided meditation specifically designed for anxiety management.',
     color: 'from-purple-400 to-pink-500',
-    image: 'https://images.unsplash.com/photo-1641391400871-3a6578a11d5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpdGF0aW9uJTIwcGVhY2VmdWwlMjB6ZW58ZW58MXx8fHwxNzY2MzYxMjQ5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'https://cdn.pixabay.com/audio/2023/10/23/audio_13c741d5b5.mp3'
+    image: 'https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    audioUrl: '/audio/Mindfulness+for+Anxiety+and+Stress.mp3'
   },
   {
     title: 'Sleep Soundly',
     category: 'Sleep',
     duration: '30:00',
-    description: 'Soothing sounds to help you fall asleep naturally',
+    description: 'Soothing sounds to help you fall asleep naturally.',
     color: 'from-indigo-400 to-purple-500',
-    image: 'https://images.unsplash.com/photo-1756058811187-6cfc539fdfa6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbGVlcCUyMG5pZ2h0JTIwbW9vbnxlbnwxfHx8fDE3NjYzNzYyNjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'https://cdn.pixabay.com/audio/2022/03/15/audio_13c2e69c00.mp3'
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    audioUrl: '/audio/kontraa-no-sleep-hiphop-music-473847.mp3'
   },
   {
-    title: 'Depression Support',
+    title: 'Soul for Stress Relief',
     category: 'Depression',
     duration: '18:00',
-    description: 'Uplifting guided meditation for managing depression',
+    description: 'A calming instrumental track to help lift your mood and ease tension.',
     color: 'from-yellow-400 to-orange-500',
-    image: 'https://images.unsplash.com/photo-1545500425-a514ded6a000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdW5yaXNlJTIwcGVhY2VmdWwlMjBuYXR1cmV8ZW58MXx8fHwxNzY2Mzc2MjY4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'https://cdn.pixabay.com/audio/2022/11/22/audio_4eb166d25e.mp3'
+    image: 'https://images.unsplash.com/photo-1545500425-a514ded6a000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    audioUrl: '/audio/musicalmix2020-soul-for-stress-relief-8956.mp3'
   },
   {
     title: 'Rain & Thunder',
     category: 'Stress Relief',
     duration: '25:00',
-    description: 'Natural rain and distant thunder for ultimate relaxation',
+    description: 'Natural rain and distant thunder for ultimate relaxation.',
     color: 'from-gray-400 to-slate-500',
     image: 'https://images.unsplash.com/photo-1664976694406-3e9f37768a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyYWluJTIwc3Rvcm0lMjBjbG91ZHN8ZW58MXx8fHwxNzY2Mzc2MjY4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    audioUrl: 'https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3'
+    audioUrl: '/audio/johnbritton-thunder-156423.mp3'
   },
+  {
+    title: 'Deep Breath Journey',
+    category: 'Meditation',
+    duration: '22:18',
+    description: 'Breathing cues and soft soundscapes for deep relaxation and focus.',
+    color: 'from-blue-400 to-indigo-500',
+    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    audioUrl: '/audio/white_records-breath-of-autumn-instrumental-background-music-for-video-46-sec-487275%20(1).mp3'
+  },
+  {
+    title: 'Autumn Breath',
+    category: 'Wellness',
+    duration: '04:46',
+    description: 'A short grounding track for calm breathing and clearer focus.',
+    color: 'from-emerald-400 to-lime-500',
+    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    audioUrl: '/audio/white_records-breath-of-autumn-instrumental-background-music-for-video-46-sec-487275%20(1).mp3'
+  }
 ];
-require('dotenv').config();
-
-const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mernapp';
 
 const products = [
-  [
   {
-    "id": "1",
     "name": "Mindfulness Journal",
     "category": "journal",
     "price": 2499.00,
@@ -272,7 +322,6 @@ const products = [
     "image": "https://images.unsplash.com/photo-1594997652537-2e2dce4ebf28?w=400&h=300&fit=crop"
   },
   {
-    "id": "2",
     "name": "Lavender Essential Oil",
     "category": "essential-oil",
     "price": 1899.00,
@@ -283,7 +332,6 @@ const products = [
     "image": "https://images.unsplash.com/photo-1647934174425-61136513aed7?w=400&h=300&fit=crop"
   },
   {
-    "id": "3",
     "name": "The Anxiety Toolkit",
     "category": "book",
     "price": 1699.00,
@@ -293,7 +341,6 @@ const products = [
     "image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop"
   },
   {
-    "id": "4",
     "name": "Meditation Cushion",
     "category": "supplement",
     "price": 3999.00,
@@ -303,7 +350,6 @@ const products = [
     "image": "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=300&fit=crop"
   },
   {
-    "id": "5",
     "name": "Gratitude Journal",
     "category": "journal",
     "price": 1999.00,
@@ -314,7 +360,6 @@ const products = [
     "image": "/gratitude.png"
   },
   {
-    "id": "6",
     "name": "Eucalyptus Essential Oil",
     "category": "essential-oil",
     "price": 1599.00,
@@ -324,7 +369,6 @@ const products = [
     "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=300&fit=crop"
   },
   {
-    "id": "7",
     "name": "The Power of Now",
     "category": "book",
     "price": 1499.00,
@@ -335,7 +379,6 @@ const products = [
     "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=300&fit=crop"
   },
   {
-    "id": "8",
     "name": "Aromatherapy Diffuser",
     "category": "supplement",
     "price": 4999.00,
@@ -344,83 +387,91 @@ const products = [
     "description": "Ultrasonic diffuser with LED lighting",
     "image": "https://images.unsplash.com/photo-1707920961189-290d19b363f3?w=400&h=300&fit=crop"
   }
-]
 ];
 
 const users = [
   {
     name: 'Admin User',
     email: 'admin@moodmart.com',
-    password: '$2b$10$Q9f0uVYFz1Xz3W0kqG0p9O6VgQ7k5LkJH6Z8gk6JQ7xk2Y4x8F9G2', // hashed 'admin123'
+    password: 'admin123',
     role: 'admin',
   },
   {
     name: 'Jane Doe',
     email: 'jane@moodmart.com',
-    password: '$2b$10$Q9f0uVYFz1Xz3W0kqG0p9O6VgQ7k5LkJH6Z8gk6JQ7xk2Y4x8F9G2', // hashed 'password123'
+    password: 'password123',
     role: 'user',
   },
   {
     name: 'John Smith',
     email: 'john@example.com',
-    password: '$2b$10$M3vWc1P9K8sQ5LzX6F0JQO9N4gY7H2D1Rk8ZpT6bXcV5U2W9A3B7e', // hashed '123456'
+    password: '123456',
     role: 'user',
   }
 ];
 
 
-
 async function seed() {
-      await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-      console.log('Connected to MongoDB');
-
-      await CartSession.deleteMany({});
-      const createdCartSessions = await CartSession.insertMany(cartSessions);
-      console.log(`Inserted ${createdCartSessions.length} cart sessions`);
-
-      await CheckoutSession.deleteMany({});
-      const createdCheckoutSessions = await CheckoutSession.insertMany(checkoutSessions);
-      console.log(`Inserted ${createdCheckoutSessions.length} checkout sessions`);
-
-      await DashboardStat.deleteMany({});
-      const createdDashboardStats = await DashboardStat.insertMany(dashboardStats);
-      console.log(`Inserted ${createdDashboardStats.length} dashboard stats`);
-
-      await Profile.deleteMany({});
-      const createdProfiles = await Profile.insertMany(profiles);
-      console.log(`Inserted ${createdProfiles.length} profiles`);
-
-      await Settings.deleteMany({});
-      const createdSettings = await Settings.insertMany(settings);
-      console.log(`Inserted ${createdSettings.length} settings`);
-
-      await ShopProduct.deleteMany({});
-      const createdShopProducts = await ShopProduct.insertMany(shopProducts);
-      console.log(`Inserted ${createdShopProducts.length} shop products`);
-
-      await OrderSuccess.deleteMany({});
-      const createdOrderSuccesses = await OrderSuccess.insertMany(orderSuccesses);
-      console.log(`Inserted ${createdOrderSuccesses.length} order successes`);
-    await BreathingSession.deleteMany({});
-    const createdBreathingSessions = await BreathingSession.insertMany(breathingSessions);
-    console.log(`Inserted ${createdBreathingSessions.length} breathing sessions`);
-
-    await FaceScanSession.deleteMany({});
-    const createdFaceScanSessions = await FaceScanSession.insertMany(faceScanSessions);
-    console.log(`Inserted ${createdFaceScanSessions.length} face scan sessions`);
   try {
+    // Connect to MongoDB
     await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log('Connected to MongoDB');
 
+    // Delete existing data
+    await CartSession.deleteMany({});
+    await CheckoutSession.deleteMany({});
+    await DashboardStat.deleteMany({});
+    await Profile.deleteMany({});
+    await Settings.deleteMany({});
+    await ShopProduct.deleteMany({});
+    await OrderSuccess.deleteMany({});
+    await BreathingSession.deleteMany({});
+    await FaceScanSession.deleteMany({});
     await CommunityPost.deleteMany({});
+    await QASession.deleteMany({});
+    await CommunityQuestion.deleteMany({});
+    await MoodEntry.deleteMany({});
+    await Notification.deleteMany({});
+    await Order.deleteMany({});
+    await Product.collection.drop().catch(() => {}); // Drop collection to clear indexes
+    await User.deleteMany({});
+    await AudioTrack.deleteMany({});
+    console.log('Cleared all existing data');
+
+    // Seed data
+    const createdCartSessions = await CartSession.insertMany(cartSessions);
+    console.log(`Inserted ${createdCartSessions.length} cart sessions`);
+
+    const createdCheckoutSessions = await CheckoutSession.insertMany(checkoutSessions);
+    console.log(`Inserted ${createdCheckoutSessions.length} checkout sessions`);
+
+    const createdDashboardStats = await DashboardStat.insertMany(dashboardStats);
+    console.log(`Inserted ${createdDashboardStats.length} dashboard stats`);
+
+    const createdProfiles = await Profile.insertMany(profiles);
+    console.log(`Inserted ${createdProfiles.length} profiles`);
+
+    const createdSettings = await Settings.insertMany(settings);
+    console.log(`Inserted ${createdSettings.length} settings`);
+
+    const createdShopProducts = await ShopProduct.insertMany(shopProducts);
+    console.log(`Inserted ${createdShopProducts.length} shop products`);
+
+    const createdOrderSuccesses = await OrderSuccess.insertMany(orderSuccesses);
+    console.log(`Inserted ${createdOrderSuccesses.length} order successes`);
+
+    const createdBreathingSessions = await BreathingSession.insertMany(breathingSessions);
+    console.log(`Inserted ${createdBreathingSessions.length} breathing sessions`);
+
+    const createdFaceScanSessions = await FaceScanSession.insertMany(faceScanSessions);
+    console.log(`Inserted ${createdFaceScanSessions.length} face scan sessions`);
+
     const createdCommunityPosts = await CommunityPost.insertMany(communityPosts);
     console.log(`Inserted ${createdCommunityPosts.length} community posts`);
 
-    await QASession.deleteMany({});
     const createdQASessions = await QASession.insertMany(qaSessions);
     console.log(`Inserted ${createdQASessions.length} Q&A sessions`);
 
-    await CommunityQuestion.deleteMany({});
     const createdCommunityQuestions = await CommunityQuestion.insertMany(communityQuestions);
     console.log(`Inserted ${createdCommunityQuestions.length} community questions`);
 
@@ -441,7 +492,12 @@ async function seed() {
     console.log(`Inserted ${created.length} products`);
 
     await User.deleteMany({});
-    const createdUsers = await User.insertMany(users);
+    const createdUsers = [];
+    for (const userData of users) {
+      const user = new User(userData);
+      await user.save();
+      createdUsers.push(user);
+    }
     console.log(`Inserted ${createdUsers.length} users`);
 
     await AudioTrack.deleteMany({});

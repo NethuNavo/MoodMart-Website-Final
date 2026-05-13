@@ -24,7 +24,7 @@ export function AudioTherapyPage() {
       description: 'Gentle ocean sounds to calm your mind and reduce stress',
       color: 'from-blue-400 to-cyan-500',
       image: 'https://images.unsplash.com/photo-1661953029179-e1b0dc900490?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvY2VhbiUyMHdhdmVzJTIwYmVhY2h8ZW58MXx8fHwxNzY2Mzc2MjY2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      audioUrl: 'https://cdn.pixabay.com/audio/2022/05/13/audio_257112ce99.mp3'
+      audioUrl: '/audio/intensity-by-audio-club-intensity-by-audio-club-343637.mp3'
     },
     {
       id: 2,
@@ -34,97 +34,97 @@ export function AudioTherapyPage() {
       description: 'Peaceful forest sounds for deep meditation',
       color: 'from-purple-400 to-purple-500',
       image: 'https://images.unsplash.com/photo-1656783208368-a7d176736535?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjBuYXR1cmUlMjB0cmVlc3xlbnwxfHx8fDE3NjYzMDYxMDl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      audioUrl: 'public/audio/audiopapkin-forest-ambience-296528.mp3'
+      audioUrl: '/audio/audiopapkin-forest-ambience-296528.mp3'
     },
     {
       id: 3,
-      title: 'Calm & Centered',
-      category: 'Meditation',
-      duration: '5:24',
-      description: 'A gentle track to maintain balance and inner peace.',
-      color: 'from-slate-400 to-slate-500',
-      image: calmCoverImage,
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+      title: 'Morning Birdsong',
+      category: 'Wellness',
+      duration: '18:30',
+      description: 'Warm bird sounds to ease into a gentle morning routine',
+      color: 'from-emerald-400 to-sky-500',
+      image: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      audioUrl: '/audio/creative_spark-morning-birdsong-246402.mp3'
     },
     {
       id: 4,
+      title: 'Calm Music',
+      category: 'Relaxation',
+      duration: '16:12',
+      description: 'A soft ambient track for clearing the mind and centering your breath.',
+      color: 'from-slate-400 to-slate-500',
+      image: calmCoverImage,
+      audioUrl: '/audio/freesound_community-calm-music-64526.mp3'
+    },
+    {
+      id: 5,
+      title: 'Aquarium Ambience',
+      category: 'Stress Relief',
+      duration: '10:00',
+      description: 'Underwater ambience for a gentle, restorative focus session.',
+      color: 'from-cyan-400 to-blue-500',
+      image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      audioUrl: '/audio/joelfazhari-aquarium-ambience-sounds-10-min-193236.mp3'
+    },
+    {
+      id: 6,
       title: 'Anxiety Relief Meditation',
       category: 'Anxiety',
       duration: '12:00',
       description: 'Guided meditation specifically designed for anxiety management',
       color: 'from-purple-400 to-pink-500',
       image: anxietyCoverImage,
-      audioUrl: 'public/audio/Mindfulness+for+Anxiety+and+Stress.mp3'
+      audioUrl: '/audio/Mindfulness+for+Anxiety+and+Stress.mp3'
     },
     {
-      id: 5,
+      id: 7,
       title: 'Sleep Soundly',
       category: 'Sleep',
       duration: '30:00',
       description: 'Soothing sounds to help you fall asleep naturally',
       color: 'from-indigo-400 to-purple-500',
       image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      audioUrl: 'public/audio/kontraa-no-sleep-hiphop-music-473847.mp3'
-    },
-    {
-      id: 6,
-      title: 'Depression Support',
-      category: 'Depression',
-      duration: '18:00',
-      description: 'Uplifting guided meditation for managing depression',
-      color: 'from-yellow-400 to-orange-500',
-      image: 'https://images.unsplash.com/photo-1545500425-a514ded6a000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdW5yaXNlJTIwcGVhY2VmdWwlMjBuYXR1cmV8ZW58MXx8fHwxNzY2Mzc2MjY4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      audioUrl: 'public/audio/intensity-by-audio-club-intensity-by-audio-club-343637.mp3'
-    },
-    {
-      id: 7,
-      title: 'Rain & Thunder',
-      category: 'Stress Relief',
-      duration: '25:00',
-      description: 'Natural rain and distant thunder for ultimate relaxation',
-      color: 'from-gray-400 to-slate-500',
-      image: 'https://images.unsplash.com/photo-1664976694406-3e9f37768a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyYWluJTIwc3Rvcm0lMjBjbG91ZHN8ZW58MXx8fHwxNzY2Mzc2MjY4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      audioUrl: 'public/audio/johnbritton-thunder-156423.mp3'
+      audioUrl: '/audio/kontraa-no-sleep-hiphop-music-473847.mp3'
     },
     {
       id: 8,
-      title: 'Mindful Morning',
-      category: 'Wellness',
-      duration: '18:32',
-      description: 'A gentle audio experience to start your day grounded and calm.',
-      color: 'from-emerald-400 to-sky-500',
-      image: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      audioUrl: 'https://cdn.pixabay.com/audio/2022/04/14/audio_3d5c8bf3d3.mp3'
+      title: 'Soul for Stress Relief',
+      category: 'Depression',
+      duration: '18:00',
+      description: 'A calming instrumental track to help lift your mood and ease tension.',
+      color: 'from-yellow-400 to-orange-500',
+      image: 'https://images.unsplash.com/photo-1545500425-a514ded6a000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080&utm_source=figma&utm_medium=referral',
+      audioUrl: '/audio/musicalmix2020-soul-for-stress-relief-8956.mp3'
     },
     {
       id: 9,
+      title: 'Rain & Thunder',
+      category: 'Stress Relief',
+      duration: '25:00',
+      description: 'Natural rain and distant thunder for ultimate relaxation.',
+      color: 'from-gray-400 to-slate-500',
+      image: 'https://images.unsplash.com/photo-1664976694406-3e9f37768a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyYWluJTIwc3Rvcm0lMjBjbG91ZHN8ZW58MXx8fHwxNzY2Mzc2MjY4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+      audioUrl: '/audio/johnbritton-thunder-156423.mp3'
+    },
+    {
+      id: 10,
+      title: 'Autumn Breath',
+      category: 'Wellness',
+      duration: '4:46',
+      description: 'A short grounding track for mindful breathing and calm focus.',
+      color: 'from-emerald-400 to-lime-500',
+      image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      audioUrl: '/audio/white_records-breath-of-autumn-instrumental-background-music-for-video-46-sec-487275%20(1).mp3'
+    },
+    {
+      id: 11,
       title: 'Deep Breath Journey',
       category: 'Meditation',
       duration: '22:18',
       description: 'Breathing cues and soft soundscapes for deep relaxation and focus.',
       color: 'from-blue-400 to-indigo-500',
       image: new URL('../../assets/deep.jpg', import.meta.url).href,
-      audioUrl: 'https://cdn.pixabay.com/audio/2022/02/02/audio_5d708d2860.mp3'
-    },
-    {
-      id: 10,
-      title: 'Nighttime Calm',
-      category: 'Sleep',
-      duration: '28:40',
-      description: 'Soft ambient tones and lullaby waves to wind down your evening.',
-      color: 'from-slate-400 to-slate-600',
-      image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      audioUrl: 'https://cdn.pixabay.com/audio/2022/07/08/audio_0cce7461d3.mp3'
-    },
-    {
-      id: 11,
-      title: 'Mental Wellness Soundscape',
-      category: 'Wellness',
-      duration: '20:00',
-      description: 'A soothing soundscape designed to support mental clarity and emotional balance.',
-      color: 'from-teal-400 to-cyan-500',
-      image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      audioUrl: 'https://cdn.pixabay.com/audio/2022/05/12/audio_1f6d623d74.mp3'
+      audioUrl: '/audio/white_records-breath-of-autumn-instrumental-background-music-for-video-46-sec-487275%20(1).mp3'
     },
   ];
 

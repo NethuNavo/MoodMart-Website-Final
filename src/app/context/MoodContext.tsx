@@ -11,6 +11,7 @@ export interface MoodEntry {
         'depressed' | 'confused' | 'mentally-drained' | 'overthinking';
   intensity: number; // 1-5 scale
   stressLevel: number;
+  segment?: 'Morning' | 'Afternoon' | 'Night';
   notes?: string;
 }
 
@@ -52,7 +53,7 @@ export interface User {
 
 interface MoodContextType {
   moodEntries: MoodEntry[];
-  addMoodEntry: (entry: Omit<MoodEntry, 'id'>) => void;
+  addMoodEntry: (entry: Omit<MoodEntry, 'id' | 'segment'>) => { success: boolean; message: string };
   cart: CartItem[];
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
@@ -82,7 +83,33 @@ const MoodContext = createContext<MoodContextType | undefined>(undefined);
 export function useMood() {
   const context = useContext(MoodContext);
   if (!context) {
-    throw new Error('useMood must be used within MoodProvider');
+    // Return safe defaults during hot reload or if provider is missing
+    return {
+      moodEntries: [],
+      addMoodEntry: () => ({ success: false, message: 'Context not available' }),
+      cart: [],
+      addToCart: () => {},
+      removeFromCart: () => {},
+      updateCartQuantity: () => {},
+      clearCart: () => {},
+      isAuthenticated: false,
+      currentUser: null,
+      login: () => null,
+      logout: () => {},
+      currentTheme: 'light',
+      setCurrentTheme: () => {},
+      products: [],
+      isProductsLoading: false,
+      loadProducts: async () => [],
+      addProduct: async () => null,
+      updateProduct: async () => null,
+      deleteProduct: async () => {},
+      orders: [],
+      updateOrderStatus: () => {},
+      users: [],
+      updateUserStatus: () => {},
+      deleteUser: () => {},
+    };
   }
   return context;
 }
@@ -252,12 +279,39 @@ export const MoodProvider = ({ children }: { children: ReactNode }) => {
     { id: '5', name: 'David Smith', email: 'david.s@example.com', role: 'user', status: 'active', joinDate: '2025-12-10' },
   ]);
 
-  const addMoodEntry = (entry: Omit<MoodEntry, 'id'>) => {
-    const newEntry = {
+  const getTimeSegment = (date = new Date()): MoodEntry['segment'] => {
+    const hour = date.getHours();
+    if (hour >= 5 && hour < 12) return 'Morning';
+    if (hour >= 12 && hour < 18) return 'Afternoon';
+    return 'Night';
+  };
+
+  const addMoodEntry = (entry: Omit<MoodEntry, 'id' | 'segment'>) => {
+    const today = new Date().toISOString().split('T')[0];
+    const segment = getTimeSegment();
+    const existingSegmentEntry = moodEntries.find(
+      (existing) => existing.date === today && existing.segment === segment
+    );
+
+    if (existingSegmentEntry) {
+      return {
+        success: false,
+        message: `You've already logged your ${segment.toLowerCase()} mood. Next available login is ${
+          segment === 'Morning' ? 'this afternoon' : segment === 'Afternoon' ? 'this evening' : 'tomorrow morning'
+        }.`,
+      };
+    }
+
+    const newEntry: MoodEntry = {
       ...entry,
       id: Date.now().toString(),
+      segment,
     };
     setMoodEntries([...moodEntries, newEntry]);
+    return {
+      success: true,
+      message: `Mood logged for ${segment.toLowerCase()} successfully.`,
+    };
   };
 
   const loadProducts = useCallback(async (): Promise<Product[]> => {

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { Camera, Scan, AlertCircle, Smile, Frown, Meh, AlertTriangle, CloudRain, ThumbsDown, Zap, Music } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -10,19 +10,14 @@ import { useUser } from '../context/UserContext';
 import { useMood } from '../context/MoodContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import * as faceapi from 'face-api.js';
 import facialRecognitionImage from "../../assets/facial-recognition.png";
 import calmCoverImage from "../../assets/calm.jpg";
 
 export function FaceScanPage() {
-  const { isGuest, isRegistered } = useUser();
+  const { isGuest, isRegistered, guestFaceScanUsed, markGuestFaceScanUsed } = useUser();
   const navigate = useNavigate();
   const { addToCart, products } = useMood();
-  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-
-  // Track guest scans
-  const [hasUsedGuestScan, setHasUsedGuestScan] = useState(() => {
-    return localStorage.getItem('faceScanGuestUsed') === 'true';
-  });
 
   const [isScanning, setIsScanning] = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -32,6 +27,26 @@ export function FaceScanPage() {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [showWebcam, setShowWebcam] = useState(true);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  // Load face-api models
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        await faceapi.loadTinyFaceDetectorModel('/models');
+        await faceapi.loadFaceLandmarkModel('/models');
+        await faceapi.loadFaceExpressionModel('/models');
+        setModelsLoaded(true);
+        console.log('Face detection models loaded successfully');
+      } catch (error) {
+        console.error('Error loading face-api models:', error);
+        toast.error('Failed to load face detection models');
+      }
+    };
+
+    loadModels();
+  }, []);
 
   const handleRequestCamera = () => {
     setCameraError(null);
@@ -107,6 +122,42 @@ export function FaceScanPage() {
       src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
       image: 'https://images.unsplash.com/photo-1511376777868-611b54f68947?w=800&q=80',
     },
+  };
+
+  const moodBreathingRecommendations: Record<string, { title: string; details: string }> = {
+    Neutral: {
+      title: 'Steady Box Breathing',
+      details: 'Inhale for 4 seconds, hold for 4, exhale for 4, hold for 4. Repeat 3–4 times.',
+    },
+    Happy: {
+      title: 'Gentle Gratitude Breath',
+      details: 'Take 4 calm breaths and focus on something positive in your day.',
+    },
+    Sad: {
+      title: 'Soft 4-7-8 Breathing',
+      details: 'Inhale for 4, hold for 7, exhale for 8. Let the body soften with each breath.',
+    },
+    Angry: {
+      title: 'Slow Exhale Reset',
+      details: 'Breathe in for 3, exhale for 6, and allow the tension to release slowly.',
+    },
+    Fearful: {
+      title: 'Grounding Diaphragmatic Breath',
+      details: 'Breathe deeply into your belly, count to 5, then gently release for 5.',
+    },
+    Disgusted: {
+      title: 'Cleansing Breath',
+      details: 'Inhale fresh air for 4 counts and exhale slowly for 6 to reset your energy.',
+    },
+    Surprised: {
+      title: 'Calm Reset Breath',
+      details: 'Take 5 deep breaths to settle your energy and stay present.',
+    },
+  };
+
+  const currentBreathingTip = moodBreathingRecommendations[currentMood.name] || {
+    title: 'Balanced Breath',
+    details: 'Take 4 long breaths and focus on a steady rhythm.',
   };
 
   const productRecommendations: Record<string, Array<{ name: string; price: string; rating: string; label: string; image?: string }>> = {
@@ -233,13 +284,16 @@ export function FaceScanPage() {
   const recommendedProductIds = moodProductIds[currentMood.name] || moodProductIds.Neutral;
   const currentProducts = recommendedProductIds
     .map(id => products.find(p => p.id === id))
-    .filter(p => p !== undefined);
+    .filter((p): p is typeof products[0] => p !== undefined);
+  
+  const moodProductFallback = products.slice(0, 4);
+  const displayedProducts = currentProducts.length > 0 ? currentProducts : moodProductFallback;
   
   const sortedEmotions = [...emotions].sort((a, b) => b.percentage - a.percentage);
 
   const handleScan = useCallback(() => {
     // Check if guest has already used their free scan
-    if (isGuest && hasUsedGuestScan) {
+    if (isGuest && guestFaceScanUsed) {
       setShowAuthPrompt(true);
       return;
     }
@@ -290,11 +344,10 @@ export function FaceScanPage() {
 
       // Mark guest scan as used
       if (isGuest) {
-        setHasUsedGuestScan(true);
-        localStorage.setItem('faceScanGuestUsed', 'true');
+        markGuestFaceScanUsed();
       }
     }, 2000);
-  }, [isGuest, hasUsedGuestScan, emotions]);
+  }, [isGuest, guestFaceScanUsed, emotions, markGuestFaceScanUsed]);
 
 
   return (
@@ -409,17 +462,28 @@ export function FaceScanPage() {
                 </div>
 
                 <div className="flex flex-col items-center gap-4">
-                    <Button 
+                    <div className="mb-4 text-center text-sm text-gray-500">
+                  {isGuest ? (
+                    guestFaceScanUsed ? (
+                      'You have used your free guest scan. Please log in to scan again.'
+                    ) : (
+                      'Guest users get one free scan. Log in afterward to continue using the feature.'
+                    )
+                  ) : (
+                    'Your scans are saved to your account for future recommendations.'
+                  )}
+                </div>
+                <Button 
                         onClick={handleScan}
-                        disabled={(!isDemoMode && (!!cameraError || !isCameraReady))}
+                        disabled={(!isDemoMode && (!!cameraError || !isCameraReady)) || (isGuest && guestFaceScanUsed)}
                         className={`px-8 py-6 text-lg font-semibold rounded-xl shadow-lg transition-all active:scale-95 ${
-                            (!isDemoMode && (!!cameraError || !isCameraReady))
+                            ((!isDemoMode && (!!cameraError || !isCameraReady)) || (isGuest && guestFaceScanUsed))
                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' 
                             : 'bg-[#a855f7] hover:bg-[#9333ea] text-white shadow-purple-200'
                         }`}
                     >
                         <Scan className="w-5 h-5 mr-2" />
-                        {isScanning ? 'Scanning...' : 'Start Scan'}
+                        {isScanning ? 'Scanning...' : (isGuest && guestFaceScanUsed ? 'Scan Limit Reached' : 'Start Scan')}
                     </Button>
                 </div>
             </div>
@@ -501,6 +565,11 @@ export function FaceScanPage() {
               <div className="mt-6 rounded-3xl bg-white p-4 shadow-sm shadow-gray-200">
                 <audio controls className="w-full rounded-3xl" src={currentAudioTrack.src} />
               </div>
+              <div className="mt-6 rounded-3xl border border-gray-200 bg-slate-50 p-6">
+                <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-semibold">Breathing Recommendation</p>
+                <h4 className="mt-4 text-lg font-semibold text-slate-900">{currentBreathingTip.title}</h4>
+                <p className="mt-3 text-sm text-slate-600">{currentBreathingTip.details}</p>
+              </div>
             </div>
           </Card>
 
@@ -563,24 +632,24 @@ export function FaceScanPage() {
             <p className="text-sm text-gray-500">Mood: {currentMood.name}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {currentProducts.map((item) => (
-              <div key={item?.id} className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+            {displayedProducts.map((item) => (
+              <div key={item.id} className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <div className="h-44 overflow-hidden bg-gray-100">
                   <ImageWithFallback
-                    src={item?.image || 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=400&h=300&fit=crop'}
-                    alt={item?.name}
+                    src={item.image || 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=400&h=300&fit=crop'}
+                    alt={item.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="p-5">
-                  <p className="text-sm font-semibold text-gray-900 mb-2">{item?.name}</p>
-                  <p className="text-xs text-gray-500 mb-4 line-clamp-2">{item?.description ?? ''}</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-2">{item.name}</p>
+                  <p className="text-xs text-gray-500 mb-4 line-clamp-2">{item.description}</p>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-bold text-purple-600">Rs.{typeof item?.price === 'number' ? item.price.toFixed(2) : item?.price}</span>
+                    <span className="text-sm font-bold text-purple-600">Rs.{item.price.toFixed(2)}</span>
                     <Button
                       size="sm"
                       className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2"
-                      onClick={() => item && handleAddToCart(item)}
+                      onClick={() => handleAddToCart(item)}
                     >
                       Add to Cart
                     </Button>

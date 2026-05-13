@@ -34,6 +34,11 @@ export function MoodTrackerPage() {
     }
   }, [isRegistered, navigate]);
 
+  // Prevent rendering if not registered
+  if (!isRegistered) {
+    return null;
+  }
+
   const { moodEntries, addMoodEntry } = useMood();
   const { showMoodBasedNotification } = useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -173,71 +178,231 @@ export function MoodTrackerPage() {
     ];
   }, [moodEntries]);
 
+  const today = new Date().toISOString().split('T')[0];
+
+  const moodLabelMap = useMemo(
+    () =>
+      Object.values(moodCategories)
+        .flat()
+        .reduce<Record<MoodType, string>>((map, option) => {
+          map[option.value] = option.label;
+          return map;
+        }, {} as Record<MoodType, string>),
+    [moodCategories]
+  );
+
+  const moodDescriptions: Record<MoodType, string> = {
+    happy: 'You are feeling positive, energized, and ready to take on the day.',
+    calm: 'You feel relaxed and balanced. Keep breathing steadily.',
+    relaxed: 'You are unwinding nicely. Maintain this gentle pace.',
+    content: 'You feel satisfied and comfortable in the moment.',
+    energetic: 'You have strong energy. Use it for focused progress.',
+    motivated: 'Your mood is driving you forward. Keep that momentum.',
+    grateful: 'You feel thankful and grounded. It’s a great emotional state.',
+    okay: 'You feel neutral right now. A small boost can make this better.',
+    normal: 'You are in a steady state. Continue to check in with yourself.',
+    focused: 'Your attention is sharp and present. Great for productivity.',
+    bored: 'You are feeling under-stimulated. Try a new activity.',
+    stressed: 'You are feeling pressure. Try a calming breathing exercise.',
+    anxious: 'Your mind is restless. Slow breathing can help.',
+    overwhelmed: 'You may be carrying a lot. Take one pause at a time.',
+    sad: 'You feel low. Gentle self-care can support your mood.',
+    frustrated: 'You feel irritated. Try grounding and slow breaths.',
+    angry: 'You feel heated. Deep breathing can help release tension.',
+    lonely: 'You feel disconnected. Reach out or be kind to yourself.',
+    sleepy: 'You need rest. A short pause or nap may help.',
+    tired: 'Your energy is low. Slow moments can restore you.',
+    exhausted: 'You need recovery. Prioritize sleep and calm routines.',
+    rested: 'You feel refreshed. Keep this restorative rhythm going.',
+    insomnia: 'Sleep is difficult. Calm breathing can ease your mind.',
+    depressed: 'You feel heavy. Small, gentle habits can make a difference.',
+    confused: 'Your thoughts feel scattered. Slow down and regroup.',
+    'mentally-drained': 'You are drained. Give yourself permission to rest.',
+    overthinking: 'Your mind is racing. Pause and breathe slowly.',
+  };
+
+  const todayEntries = useMemo(
+    () => moodEntries.filter(entry => entry.date === today),
+    [moodEntries, today]
+  );
+
+  const currentMoodEntry = useMemo(() => {
+    if (todayEntries.length > 0) {
+      return todayEntries[todayEntries.length - 1];
+    }
+    return moodEntries.length > 0 ? moodEntries[moodEntries.length - 1] : undefined;
+  }, [todayEntries, moodEntries]);
+
+  const timeSegments = ['Morning', 'Afternoon', 'Night'] as const;
+  const getTimeSegment = (date = new Date()): typeof timeSegments[number] => {
+    const hour = date.getHours();
+    if (hour >= 5 && hour < 12) return 'Morning';
+    if (hour >= 12 && hour < 18) return 'Afternoon';
+    return 'Night';
+  };
+
+  const maxMoodLogsPerDay = timeSegments.length;
+  const currentTimeSegment = getTimeSegment();
+  const todayMoodCount = todayEntries.length;
+  const currentSegmentEntry = todayEntries.find(entry => entry.segment === currentTimeSegment);
+  const canLogToday = todayMoodCount < maxMoodLogsPerDay && !currentSegmentEntry;
+
+  const nextAllowedLogin = currentSegmentEntry
+    ? currentTimeSegment === 'Morning'
+      ? 'This afternoon'
+      : currentTimeSegment === 'Afternoon'
+      ? 'Tonight'
+      : 'Tomorrow morning'
+    : 'Now';
+
+  const todayMoodTimeline = timeSegments.map((segment) => {
+    const entry = todayEntries.find((item) => item.segment === segment);
+    return {
+      segment,
+      mood: entry ? moodLabelMap[entry.mood] : 'No entry yet',
+      intensity: entry?.intensity ?? 0,
+      stressLevel: entry?.stressLevel ?? 0,
+      note: entry?.notes || 'Log this part of the day to improve your mood insights.',
+      filled: Boolean(entry),
+    };
+  });
+
   const todayMoodTrendData = useMemo(
-    () => [
-      { period: 'Morning', value: 80 },
-      { period: 'Afternoon', value: 30 },
-      { period: 'Night', value: 65 },
-    ],
-    []
+    () =>
+      timeSegments.map((segment) => {
+        const entry = todayEntries.find((item) => item.segment === segment);
+        return {
+          period: segment,
+          value: entry ? Math.round((entry.intensity / 5) * 100) : 0,
+          mood: entry ? moodLabelMap[entry.mood] : 'No entry',
+        };
+      }),
+    [todayEntries, moodLabelMap, timeSegments]
   );
 
-  const weeklyMoodTrendData = useMemo(
-    () => [
-      { day: 'Sun', value: 70 },
-      { day: 'Mon', value: 55 },
-      { day: 'Tue', value: 65 },
-      { day: 'Wed', value: 40 },
-      { day: 'Thu', value: 75 },
-      { day: 'Fri', value: 60 },
-      { day: 'Sat', value: 65 },
-    ],
-    []
-  );
+  const getThisWeekEntries = useMemo(() => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+    startOfWeek.setHours(0, 0, 0, 0);
+    return moodEntries.filter(entry => new Date(entry.date) >= startOfWeek);
+  }, [moodEntries]);
 
-  const moodDistributionData = useMemo(
-    () => [
-      { name: 'Positive', value: 52, fill: '#88D8B0' },
-      { name: 'Neutral', value: 24, fill: '#C4B5FD' },
-      { name: 'Negative', value: 24, fill: '#F9A8D4' },
-    ],
-    []
-  );
+  const moodDistributionData = useMemo(() => {
+    const negativeMoods = ['stressed', 'anxious', 'overwhelmed', 'sad', 'frustrated', 'angry', 'lonely', 'depressed', 'confused', 'mentally-drained', 'overthinking', 'exhausted', 'insomnia'];
+    const positiveMoods = ['happy', 'calm', 'relaxed', 'content', 'energetic', 'motivated', 'grateful', 'rested'];
+    const neutralMoods = ['okay', 'normal', 'focused', 'bored'];
+
+    const entries = getThisWeekEntries;
+    const positiveCount = entries.filter(entry => positiveMoods.includes(entry.mood)).length;
+    const negativeCount = entries.filter(entry => negativeMoods.includes(entry.mood)).length;
+    const neutralCount = entries.filter(entry => neutralMoods.includes(entry.mood)).length;
+    const total = positiveCount + negativeCount + neutralCount;
+
+    if (total === 0) {
+      return [
+        { name: 'Positive', value: 33, fill: '#88D8B0' },
+        { name: 'Neutral', value: 34, fill: '#C4B5FD' },
+        { name: 'Negative', value: 33, fill: '#F9A8D4' },
+      ];
+    }
+
+    return [
+      { name: 'Positive', value: Math.round((positiveCount / total) * 100), fill: '#88D8B0' },
+      { name: 'Neutral', value: Math.round((neutralCount / total) * 100), fill: '#C4B5FD' },
+      { name: 'Negative', value: Math.round((negativeCount / total) * 100), fill: '#F9A8D4' },
+    ];
+  }, [getThisWeekEntries]);
 
   const dailyMoodAverage = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const todayEntries = moodEntries.filter(entry => entry.date === today);
     if (!todayEntries.length) return 63;
     return Math.round(
-      todayEntries.reduce((sum, entry) => sum + (entry.intensity || 3) * 20, 0) / todayEntries.length
+      todayEntries.reduce((sum, entry) => sum + entry.intensity * 20, 0) / todayEntries.length
     );
+  }, [todayEntries]);
+
+  const positivityRate = useMemo(() => {
+    const positiveMoods = ['happy', 'calm', 'relaxed', 'content', 'energetic', 'motivated', 'grateful', 'rested'];
+    const positiveCount = moodEntries.filter(entry => positiveMoods.includes(entry.mood)).length;
+    const total = moodEntries.length;
+    return total > 0 ? Math.round((positiveCount / total) * 100) : 0;
+  }, [moodEntries]);
+
+  const dayStreak = useMemo(() => {
+    const allDates = Array.from(new Set(moodEntries.map(entry => entry.date))).sort((a, b) => b.localeCompare(a));
+    let streak = 0;
+    const date = new Date();
+
+    while (true) {
+      const isoDate = date.toISOString().split('T')[0];
+      if (allDates.includes(isoDate)) {
+        streak += 1;
+        date.setDate(date.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return streak;
   }, [moodEntries]);
 
   const moodStability = useMemo(() => {
-    const positiveValue = moodBreakdownData.find(item => item.name === 'Positive')?.value ?? 55;
+    const positiveValue = positivityRate;
     return Math.round(Math.min(92, Math.max(64, 56 + positiveValue * 0.25)));
-  }, [moodBreakdownData]);
+  }, [positivityRate]);
 
-  const stressTime = 'Afternoon';
-  const moodChange = 35;
+  const moodChange = useMemo(() => {
+    if (todayEntries.length < 2) {
+      return 0;
+    }
+    return Math.round((todayEntries[todayEntries.length - 1].intensity - todayEntries[0].intensity) * 20);
+  }, [todayEntries]);
+
+  const stressTime = useMemo(() => {
+    if (!todayEntries.length) return 'Afternoon';
+    const index = todayEntries.reduce((maxIndex, entry, idx, arr) => entry.stressLevel > arr[maxIndex].stressLevel ? idx : maxIndex, 0);
+    return timeSegments[index] ?? 'Afternoon';
+  }, [todayEntries, timeSegments]);
+
+  const calmTime = useMemo(() => {
+    if (!todayEntries.length) return 'Night';
+    const index = todayEntries.reduce((minIndex, entry, idx, arr) => entry.stressLevel < arr[minIndex].stressLevel ? idx : minIndex, 0);
+    return timeSegments[index] ?? 'Night';
+  }, [todayEntries, timeSegments]);
+
+  const currentMoodDescription = currentMoodEntry
+    ? moodDescriptions[currentMoodEntry.mood]
+    : 'Track your mood today to get tailored insights and recommendations.';
 
   const handleSaveMood = () => {
-    addMoodEntry({
+    if (!canLogToday) {
+      toast.error(
+        currentSegmentEntry
+          ? `You've already logged your ${currentTimeSegment.toLowerCase()} mood. Next allowed login is ${nextAllowedLogin}.`
+          : 'You have reached the maximum of 3 mood logs for today. Please try again tomorrow.'
+      );
+      return;
+    }
+
+    const result = addMoodEntry({
       date: new Date().toISOString().split('T')[0],
       mood: selectedMood,
       intensity: intensity[0],
       stressLevel: intensity[0],
       notes: moodNote,
     });
-    
-    // Reset form
+
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+
     setSelectedMood('calm');
     setIntensity([3]);
     setMoodNote('');
     setIsModalOpen(false);
-    toast.success('Mood logged successfully!');
-    
-    // Show motivational notification after mood logging
+    toast.success(result.message);
+
     setTimeout(() => {
       showMoodBasedNotification(selectedMood, intensity[0]);
     }, 1000);
@@ -270,139 +435,72 @@ export function MoodTrackerPage() {
       {/* Main Content */}
       <div className="min-h-screen bg-gradient-to-br from-[#B4D4D3] via-white to-[#C5B8D8]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex justify-center mb-8">
+          <div className="flex flex-col items-center justify-center gap-4 mb-8">
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 text-lg rounded-full shadow-[0_22px_80px_rgba(124,58,237,0.24)] transition hover:-translate-y-1"
+              disabled={!canLogToday}
+              className={`text-white px-8 py-6 text-lg rounded-full shadow-[0_22px_80px_rgba(124,58,237,0.24)] transition hover:-translate-y-1 ${canLogToday ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
             >
               <Plus className="mr-2 h-5 w-5" />
-              Log My Mood
+              {canLogToday ? 'Log My Mood' : currentSegmentEntry ? `Already logged ${currentTimeSegment.toLowerCase()}` : 'Mood logging limit reached'}
             </Button>
+            <p className="text-sm text-slate-600">
+              {todayMoodCount} of {maxMoodLogsPerDay} mood checks logged for today.
+            </p>
+            {currentSegmentEntry && (
+              <p className="text-sm text-purple-700">
+                You already logged this {currentTimeSegment.toLowerCase()}. Next allowed login is {nextAllowedLogin}.
+              </p>
+            )}
           </div>
 
           <div className="grid gap-8 lg:grid-cols-[1.65fr_0.95fr] mb-8">
             <div className="space-y-6">
               <div className="grid gap-6 md:grid-cols-3">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  whileHover={{ y: -6 }}
-                  className="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-yellow-50 via-white to-amber-100 shadow-[0_28px_80px_rgba(251,191,36,0.18)] backdrop-blur-xl"
-                >
-                  <div className="absolute -right-10 top-8 h-28 w-28 rounded-full bg-yellow-300/30 blur-3xl" />
-                  <div className="relative z-10 p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-amber-200/90 text-amber-700 shadow-[0_15px_40px_rgba(249,115,22,0.18)] text-xl">
-                        😊
-                      </div>
-                      <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs uppercase tracking-[0.32em] text-slate-700 shadow-sm">
-                        <CheckCircle2 className="h-4 w-4 text-amber-600" />
-                        Completed
-                      </span>
+            {todayMoodTimeline.map((slot, index) => (
+              <motion.div
+                key={slot.segment}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: index * 0.08 }}
+                whileHover={{ y: -6 }}
+                className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/90 shadow-[0_28px_80px_rgba(99,102,241,0.08)] backdrop-blur-xl"
+              >
+                <div className="absolute -right-10 top-8 h-28 w-28 rounded-full bg-violet-200/25 blur-3xl" />
+                <div className="relative z-10 p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-violet-100 text-violet-700 shadow-[0_15px_40px_rgba(124,58,237,0.16)] text-xl">
+                      {slot.filled ? '✨' : '➕'}
                     </div>
-                    <p className="mt-6 text-sm uppercase tracking-[0.24em] text-slate-500">Morning Mood</p>
-                    <h3 className="mt-3 text-2xl font-semibold text-slate-950">Happy</h3>
-                    <p className="mt-3 text-sm text-slate-600">How are you starting your day?</p>
-                    <div className="mt-6">
-                      <div className="flex items-center justify-between text-sm font-semibold text-slate-700">
-                        <span>Intensity</span>
-                        <span>8/10</span>
-                      </div>
-                      <Slider
-                        value={[8]}
-                        onValueChange={() => {}}
-                        min={1}
-                        max={10}
-                        step={1}
-                        className="mt-3"
-                      />
-                    </div>
-                    <div className="mt-6 rounded-3xl border border-white/60 bg-white/70 p-4 text-sm text-slate-700 shadow-[0_15px_35px_rgba(245,158,11,0.08)]">
-                      Woke up fresh and motivated for the day!
-                    </div>
-                    <p className="mt-4 text-xs uppercase tracking-[0.25em] text-slate-500">8:30 AM</p>
+                    <span className="rounded-full bg-white/80 px-3 py-1 text-xs uppercase tracking-[0.32em] text-slate-700 shadow-sm">
+                      {slot.segment}
+                    </span>
                   </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.55, delay: 0.1 }}
-                  whileHover={{ y: -6 }}
-                  className="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-pink-50 via-white to-violet-100 shadow-[0_28px_80px_rgba(219,39,119,0.16)] backdrop-blur-xl"
-                >
-                  <div className="absolute -right-12 top-6 h-32 w-32 rounded-full bg-fuchsia-300/30 blur-3xl" />
-                  <div className="relative z-10 p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-fuchsia-200/90 text-fuchsia-700 shadow-[0_15px_40px_rgba(219,39,119,0.18)] text-xl">
-                        😟
-                      </div>
-                      <span className="rounded-full bg-white/70 px-3 py-1 text-xs uppercase tracking-[0.32em] text-slate-700 shadow-sm">Focus</span>
+                  <p className="mt-6 text-sm uppercase tracking-[0.24em] text-slate-500">Mood</p>
+                  <h3 className="mt-3 text-2xl font-semibold text-slate-950">{slot.mood}</h3>
+                  <p className="mt-3 text-sm text-slate-600">{slot.filled ? 'Recorded from your latest mood log.' : 'No log yet in this time slot.'}</p>
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between text-sm font-semibold text-slate-700">
+                      <span>Intensity</span>
+                      <span>{slot.filled ? `${slot.intensity}/5` : '—'}</span>
                     </div>
-                    <p className="mt-6 text-sm uppercase tracking-[0.24em] text-slate-500">Afternoon Mood</p>
-                    <h3 className="mt-3 text-2xl font-semibold text-slate-950">Stressed</h3>
-                    <p className="mt-3 text-sm text-slate-600">How has your day been so far?</p>
-                    <div className="mt-6">
-                      <div className="flex items-center justify-between text-sm font-semibold text-slate-700">
-                        <span>Intensity</span>
-                        <span>3/10</span>
-                      </div>
-                      <Slider
-                        value={[3]}
-                        onValueChange={() => {}}
-                        min={1}
-                        max={10}
-                        step={1}
-                        className="mt-3"
-                      />
-                    </div>
-                    <div className="mt-6 rounded-3xl border border-white/60 bg-white/70 p-4 text-sm text-slate-700 shadow-[0_15px_35px_rgba(168,85,247,0.08)]">
-                      Too much workload and back-to-back meetings.
-                    </div>
-                    <p className="mt-4 text-xs uppercase tracking-[0.25em] text-slate-500">2:15 PM</p>
+                    <Slider
+                      value={[slot.filled ? slot.intensity : 1]}
+                      onValueChange={() => {}}
+                      min={1}
+                      max={5}
+                      step={1}
+                      className="mt-3"
+                    />
                   </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  whileHover={{ y: -6 }}
-                  className="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-indigo-50 via-white to-slate-100 shadow-[0_28px_80px_rgba(99,102,241,0.16)] backdrop-blur-xl"
-                >
-                  <div className="absolute -right-10 top-10 h-32 w-32 rounded-full bg-blue-200/25 blur-3xl" />
-                  <div className="relative z-10 p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-indigo-200/90 text-indigo-700 shadow-[0_15px_40px_rgba(59,130,246,0.18)] text-xl">
-                        😌
-                      </div>
-                      <span className="rounded-full bg-white/70 px-3 py-1 text-xs uppercase tracking-[0.32em] text-slate-700 shadow-sm">Night</span>
-                    </div>
-                    <p className="mt-6 text-sm uppercase tracking-[0.24em] text-slate-500">Night Mood</p>
-                    <h3 className="mt-3 text-2xl font-semibold text-slate-950">Calm</h3>
-                    <p className="mt-3 text-sm text-slate-600">How do you feel before sleep?</p>
-                    <div className="mt-6">
-                      <div className="flex items-center justify-between text-sm font-semibold text-slate-700">
-                        <span>Intensity</span>
-                        <span>7/10</span>
-                      </div>
-                      <Slider
-                        value={[7]}
-                        onValueChange={() => {}}
-                        min={1}
-                        max={10}
-                        step={1}
-                        className="mt-3"
-                      />
-                    </div>
-                    <div className="mt-6 rounded-3xl border border-white/60 bg-white/70 p-4 text-sm text-slate-700 shadow-[0_15px_35px_rgba(59,130,246,0.08)]">
-                      Watched a movie and did some breathing exercises.
-                    </div>
-                    <p className="mt-4 text-xs uppercase tracking-[0.25em] text-slate-500">10:30 PM</p>
+                  <div className="mt-6 rounded-3xl border border-white/60 bg-slate-50 p-4 text-sm text-slate-700 shadow-[0_15px_35px_rgba(99,102,241,0.08)]">
+                    {slot.note}
                   </div>
-                </motion.div>
-              </div>
+                  <p className="mt-4 text-xs uppercase tracking-[0.25em] text-slate-500">Stress: {slot.filled ? `${slot.stressLevel}/10` : 'No data'}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
             </div>
 
             <div className="space-y-6">
@@ -426,7 +524,7 @@ export function MoodTrackerPage() {
                   <div className="mt-6 grid gap-4">
                     <div className="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm">
                       <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Mood Change</p>
-                      <p className="mt-2 text-sm font-semibold text-slate-900">+{moodChange} Improved</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-900">{moodChange > 0 ? `+${moodChange} Improved` : moodChange < 0 ? `${moodChange} Since start` : 'No change yet'}</p>
                     </div>
                     <div className="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm">
                       <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Stability</p>
@@ -459,8 +557,8 @@ export function MoodTrackerPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={todayMoodTrendData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,58,237,0.12)" />
-                      <XAxis dataKey="period" tick={{ fontSize: 12, fill: '#7C3AED' }} />
-                      <YAxis tick={{ fontSize: 12, fill: '#7C3AED' }} domain={[0, 100]} />
+                      <XAxis dataKey="period" tick={{ fontSize: 12, fill: '#7C3AED' }} label={{ value: 'Time of Day', position: 'insideBottom', offset: -5 }} />
+                      <YAxis tick={{ fontSize: 12, fill: '#7C3AED' }} domain={[0, 100]} label={{ value: 'Mood Intensity (%)', angle: -90, position: 'insideLeft' }} />
                       <Tooltip />
                       <Line type="monotone" dataKey="value" stroke="#7C3AED" strokeWidth={3} dot={{ fill: '#C084FC', r: 5 }} activeDot={{ r: 7 }} />
                     </LineChart>
@@ -563,7 +661,7 @@ export function MoodTrackerPage() {
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                      <p className="text-xl font-semibold text-slate-950">21 Entries</p>
+                      <p className="text-xl font-semibold text-slate-950">{getThisWeekEntries.length} Entries</p>
                       <p className="mt-1 text-sm text-slate-500">This Week</p>
                     </div>
                   </div>
@@ -647,7 +745,7 @@ export function MoodTrackerPage() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Day Streak</p>
-                  <p className="mt-3 text-3xl font-semibold text-slate-950">7</p>
+                  <p className="mt-3 text-3xl font-semibold text-slate-950">{dayStreak}</p>
                 </div>
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-orange-100 text-orange-600 shadow-[0_15px_30px_rgba(251,191,36,0.18)]">
                   <Flame className="h-6 w-6" />
@@ -664,7 +762,7 @@ export function MoodTrackerPage() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Positivity Rate</p>
-                  <p className="mt-3 text-3xl font-semibold text-slate-950">60%</p>
+                  <p className="mt-3 text-3xl font-semibold text-slate-950">{positivityRate}%</p>
                 </div>
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-emerald-100 text-emerald-700 shadow-[0_15px_30px_rgba(16,185,129,0.18)]">
                   <ArrowUpRight className="h-6 w-6" />
@@ -681,7 +779,7 @@ export function MoodTrackerPage() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Most Stressful Time</p>
-                  <p className="mt-3 text-3xl font-semibold text-slate-950">Afternoon</p>
+                  <p className="mt-3 text-3xl font-semibold text-slate-950">{stressTime}</p>
                 </div>
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-violet-100 text-violet-700 shadow-[0_15px_30px_rgba(124,58,237,0.18)]">
                   <AlertTriangle className="h-6 w-6" />
@@ -698,7 +796,7 @@ export function MoodTrackerPage() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Most Calm Time</p>
-                  <p className="mt-3 text-3xl font-semibold text-slate-950">Night</p>
+                  <p className="mt-3 text-3xl font-semibold text-slate-950">{calmTime}</p>
                 </div>
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-indigo-100 text-indigo-700 shadow-[0_15px_30px_rgba(99,102,241,0.18)]">
                   <Moon className="h-6 w-6" />
