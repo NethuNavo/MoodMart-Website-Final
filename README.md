@@ -124,7 +124,7 @@ Nodemailer uses Gmail SMTP. Make sure you:
 
 ## 🌐 Deployment
 
-Frontend deployed with Vercel:
+Frontend deployed with Vercel: https://moodmart-platform-website.vercel.app/
 
 
 
